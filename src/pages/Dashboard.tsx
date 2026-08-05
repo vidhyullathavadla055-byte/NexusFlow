@@ -1,3 +1,5 @@
+import Canvas from "../components/Canvas";
+
 function Dashboard() {
   return (
     <div>
@@ -34,6 +36,8 @@ function Dashboard() {
           Team Members
         </div>
       </div>
+
+      <Canvas />
     </div>
   );
 }
