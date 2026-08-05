@@ -3,6 +3,7 @@ import ReactFlow, {
   Controls,
   MiniMap,
 } from "reactflow";
+
 import "reactflow/dist/style.css";
 
 const nodes = [
@@ -26,10 +27,14 @@ const edges = [
   },
 ];
 
-export default function Canvas() {
+function Canvas() {
   return (
     <div style={{ width: "100%", height: "600px" }}>
-      <ReactFlow nodes={nodes} edges={edges} fitView>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        fitView
+      >
         <MiniMap />
         <Controls />
         <Background />
@@ -37,3 +42,5 @@ export default function Canvas() {
     </div>
   );
 }
+
+export default Canvas;
