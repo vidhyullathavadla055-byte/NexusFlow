@@ -1,0 +1,127 @@
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.auth-field span {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.auth-forgot {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #2563eb;
+  text-decoration: none;
+}
+.auth-forgot:hover {
+  text-decoration: underline;
+}
+
+.auth-field input {
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 400;
+  padding: 11px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f9fafb;
+  color: #0f172a;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.auth-field input:focus {
+  border-color: #2563eb;
+  background: #fff;
+}
+
+.auth-password-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.auth-password-wrap input {
+  padding-right: 56px;
+}
+
+.auth-password-toggle {
+  position: absolute;
+  right: 10px;
+  border: none;
+  background: none;
+  color: #2563eb;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+
+.auth-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+.auth-submit {
+  margin-top: 6px;
+  border: none;
+  border-radius: 10px;
+  padding: 13px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  background: #2563eb;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.05s;
+}
+.auth-submit:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+.auth-submit:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.auth-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.auth-submit--green {
+  background: #10b981;
+}
+.auth-submit--green:hover:not(:disabled) {
+  background: #059669;
+}
+
+.auth-switch {
+  text-align: center;
+  font-size: 13.5px;
+  color: #64748b;
+  margin: 22px 0 0;
+}
+.auth-switch a {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: none;
+}
+.auth-switch a:hover {
+  text-decoration: underline;
+}

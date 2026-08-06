@@ -1,0 +1,99 @@
+.dash-shell {
+  position: relative;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  min-height: 100svh;
+  background: #f1f5f9;
+  font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+  text-align: left;
+}
+
+.dash-topbar {
+  height: 60px;
+  background: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  box-sizing: border-box;
+}
+
+.dash-brand {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dash-brand-mark {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: #60a5fa;
+  display: inline-block;
+}
+
+.dash-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dash-user-name {
+  color: #cbd5e1;
+  font-size: 13.5px;
+}
+
+.dash-user-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dash-logout {
+  border: 1px solid #334155;
+  background: transparent;
+  color: #e2e8f0;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.dash-logout:hover {
+  background: #1e293b;
+}
+
+.dash-main {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 28px 24px 48px;
+  box-sizing: border-box;
+}
+
+.dash-heading {
+  margin-bottom: 18px;
+}
+
+.dash-heading h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px;
+}
+
+.dash-heading p {
+  font-size: 13.5px;
+  color: #64748b;
+  margin: 0;
+}
