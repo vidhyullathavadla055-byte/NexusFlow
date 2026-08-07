@@ -10,20 +10,20 @@ let wss;
  * match what the frontend's Live Dashboard expects
  * (see nexusflow-frontend/src/data/mockTelemetry.js).
  */
-export function initWebSocket(httpServer) {
-  wss = new WebSocketServer({ server: httpServer, path: "/ws" });
+export function initWebSocket( httpServer ) {
+  wss = new WebSocketServer( { server: httpServer, path: "/ws" } );
 
-  wss.on("connection", (socket) => {
-    console.log(`[ws] client connected — ${wss.clients.size} total`);
-    socket.send(JSON.stringify({ type: "hello", payload: { message: "connected to NexusFlow stream" } }));
+  wss.on( "connection", ( socket ) => {
+    console.log( `[ws] client connected — ${wss.clients.size} total` );
+    socket.send( JSON.stringify( { type: "hello", payload: { message: "connected to NexusFlow stream" } } ) );
 
-    socket.on("close", () => console.log(`[ws] client disconnected — ${wss.clients.size} total`));
-  });
+    socket.on( "close", () => console.log( `[ws] client disconnected — ${wss.clients.size} total` ) );
+  } );
 
-  telemetry$.subscribe((reading) => {
-    const device = getDevice(reading.deviceId);
-    const status = device ? statusFor(reading.value, device) : "normal";
-    broadcast({
+  telemetry$.subscribe( ( reading ) => {
+    const device = getDevice( reading.deviceId );
+    const status = device ? statusFor( reading.value, device ) : "normal";
+    broadcast( {
       type: "telemetry",
       payload: {
         deviceId: reading.deviceId,
@@ -34,22 +34,22 @@ export function initWebSocket(httpServer) {
         status,
         t: reading.timestamp || Date.now(),
       },
-    });
-  });
+    } );
+  } );
 
   return wss;
 }
 
-function statusFor(value, device) {
-  if (value >= device.critical) return "critical";
-  if (value >= device.warn) return "warning";
+function statusFor( value, device ) {
+  if ( value >= device.critical ) return "critical";
+  if ( value >= device.warn ) return "warning";
   return "normal";
 }
 
-export function broadcast(message) {
-  if (!wss) return;
-  const data = JSON.stringify(message);
-  wss.clients.forEach((client) => {
-    if (client.readyState === client.OPEN) client.send(data);
-  });
+export function broadcast( message ) {
+  if ( !wss ) return;
+  const data = JSON.stringify( message );
+  wss.clients.forEach( ( client ) => {
+    if ( client.readyState === client.OPEN ) client.send( data );
+  } );
 }

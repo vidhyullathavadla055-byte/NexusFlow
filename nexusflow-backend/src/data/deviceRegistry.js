@@ -9,6 +9,6 @@ export const DEVICES = [
   { id: "MTR-091", label: "Motor 91 — Bay A", metric: "RPM", unit: "rpm", base: 1450, noise: 40, warn: 1800, critical: 2000 },
 ];
 
-export function getDevice(deviceId) {
-  return DEVICES.find((d) => d.id === deviceId);
+export function getDevice( deviceId ) {
+  return DEVICES.find( ( d ) => d.id === deviceId );
 }
