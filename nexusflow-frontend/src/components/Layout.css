@@ -1,0 +1,135 @@
+.layout {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  background: #f8fafc;
+  overflow-x: hidden;
+}
+
+/* Main area beside sidebar */
+.layout-content {
+  flex: 1;
+  min-width: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Top navigation */
+.layout-topbar {
+  height: 64px;
+  min-height: 64px;
+  width: 100%;
+  background: #0f172a;
+  color: #ffffff;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 28px;
+  box-sizing: border-box;
+
+  border-bottom: 1px solid #1e293b;
+}
+
+.layout-topbar h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.layout-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.layout-user > span:first-child {
+  color: #cbd5e1;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.layout-avatar {
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  background: #2563eb;
+  color: #ffffff;
+
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.layout-user button {
+  border: 1px solid #475569;
+  border-radius: 6px;
+
+  background: transparent;
+  color: #e2e8f0;
+
+  padding: 7px 14px;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.layout-user button:hover {
+  background: #1e293b;
+  border-color: #64748b;
+}
+
+/* Page content */
+.layout-main {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+
+  padding: 28px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+  .layout-main {
+    padding: 20px;
+  }
+
+  .layout-topbar {
+    padding: 0 20px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .layout-topbar {
+    height: 58px;
+    min-height: 58px;
+    padding: 0 14px;
+  }
+
+  .layout-topbar h2 {
+    font-size: 17px;
+  }
+
+  .layout-user > span:first-child {
+    display: none;
+  }
+
+  .layout-main {
+    padding: 16px;
+  }
+}

@@ -1,33 +1,91 @@
 .sidebar {
-  width: 220px;
-  background: #1f2937;
-  color: white;
+  width: 230px;
+  min-width: 230px;
   min-height: 100vh;
-  padding: 20px;
+
+  background: #0f172a;
+  color: #ffffff;
+
+  box-sizing: border-box;
+  padding: 22px 14px;
+
+  display: flex;
+  flex-direction: column;
+
+  border-right: 1px solid #1e293b;
 }
 
-.sidebar-logo {
-  text-align: center;
-  margin-bottom: 30px;
+/* NexusFlow brand */
+.sidebar-brand {
+  color: #ffffff;
+
+  font-size: 20px;
+  font-weight: 700;
+
+  padding: 4px 14px 28px;
+
+  letter-spacing: -0.2px;
 }
 
+.sidebar-brand span {
+  color: #60a5fa;
+}
+
+/* Navigation */
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 6px;
 }
 
 .sidebar-link {
-  color: white;
+  display: flex;
+  align-items: center;
+
+  min-height: 44px;
+
+  padding: 0 14px;
+
+  box-sizing: border-box;
+
+  border-radius: 7px;
+
+  color: #cbd5e1;
   text-decoration: none;
-  padding: 10px;
-  border-radius: 6px;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
 .sidebar-link:hover {
-  background: #374151;
+  background: #1e293b;
+  color: #ffffff;
 }
 
 .sidebar-link.active {
   background: #2563eb;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+  .sidebar {
+    width: 190px;
+    min-width: 190px;
+    padding: 18px 10px;
+  }
+
+  .sidebar-brand {
+    font-size: 18px;
+    padding-left: 10px;
+  }
+
+  .sidebar-link {
+    font-size: 13px;
+  }
 }

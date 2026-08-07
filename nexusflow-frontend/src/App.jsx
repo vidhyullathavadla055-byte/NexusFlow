@@ -1,12 +1,20 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+
 import Login from "./components/Login";
 import Signup from "./components/Signup";
+import Layout from "./components/Layout";
+
 import Dashboard from "./pages/Dashboard";
+import Activity from "./pages/Activity";
+import Alerts from "./pages/Alerts";
+import Settings from "./pages/Settings";
 
 function ProtectedRoute({ children }) {
   const { token, ready } = useAuth();
-  if (!ready) return null; // wait for localStorage check before deciding
+
+  if (!ready) return null;
+
   return token ? children : <Navigate to="/login" replace />;
 }
 
@@ -15,16 +23,33 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/login" element={token ? <Navigate to="/" replace /> : <Login />} />
-      <Route path="/signup" element={token ? <Navigate to="/" replace /> : <Signup />} />
+      {/* Public Routes */}
       <Route
-        path="/*"
+        path="/login"
+        element={token ? <Navigate to="/" replace /> : <Login />}
+      />
+
+      <Route
+        path="/signup"
+        element={token ? <Navigate to="/" replace /> : <Signup />}
+      />
+
+      {/* Protected Routes with common Layout */}
+      <Route
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <Layout />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/activity" element={<Activity />} />
+        <Route path="/alerts" element={<Alerts />} />
+        <Route path="/settings" element={<Settings />} />
+      </Route>
+
+      {/* Unknown URL */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
