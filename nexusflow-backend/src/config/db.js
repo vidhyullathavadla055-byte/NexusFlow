@@ -1,5 +1,6 @@
 import { MongoClient } from "mongodb";
 import { env } from "./env.js";
+import { ensureUserIndexes } from "../models/userModel.js";
 
 let client;
 let db;
@@ -55,6 +56,7 @@ async function ensureSupportingCollections() {
   await db.collection("graphs").createIndex({ updatedAt: -1 });
   await db.collection("alerts").createIndex({ createdAt: -1 });
   await db.collection("alerts").createIndex({ deviceId: 1 });
+  await ensureUserIndexes(); // Krishna — unique index on users.email
 }
 
 export function getDb() {

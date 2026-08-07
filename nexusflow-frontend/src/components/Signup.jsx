@@ -79,7 +79,7 @@ function Signup() {
           <span>Password</span>
           <input
             type="password"
-            placeholder="At least 6 characters"
+            placeholder="At least 8 characters"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="new-password"
