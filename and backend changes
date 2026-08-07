@@ -1,0 +1,68 @@
+[33mcommit ec1a484b4a2df7a62de72350d2303dabd43273c7[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: krishna <kkrkrishna515@gmail.com>
+Date:   Thu Aug 6 10:22:39 2026 +0530
+
+    Implement frontend updates and backend changes
+
+[33mcommit a0376995780486d2c2c68ae8fca53a5385bda07d[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Merge: ec4efa7 4841064
+Author: VADLA VIDHYULLATHA <vidhyullathavadla055@gmail.com>
+Date:   Wed Aug 5 22:26:54 2026 +0530
+
+    Merged Krishna branch
+
+[33mcommit ec4efa7f9b7b9079dd8302459660a6a8ed74a6e3[m
+Merge: e8c84f8 108895f
+Author: VADLA VIDHYULLATHA <vidhyullathavadla055@gmail.com>
+Date:   Wed Aug 5 22:12:27 2026 +0530
+
+    Merge remote-tracking branch 'origin/mohan'
+
+[33mcommit e8c84f8253dfe9ced3fcde400f43cbbc424a9486[m
+Author: VADLA VIDHYULLATHA <vidhyullathavadla055@gmail.com>
+Date:   Wed Aug 5 21:56:16 2026 +0530
+
+    Converted frontend from TypeScript to JavaScript
+
+[33mcommit 108895f104c6da3afd1c42eab4c5b2b2fab97e9d[m[33m ([m[1;31morigin/mohan[m[33m)[m
+Author: Mohan Sahu <mohanmppsc@gmail.com>
+Date:   Wed Aug 5 20:48:24 2026 +0530
+
+    up to date
+
+[33mcommit 822d5e2bb4f9d6aafdb8de5c8ab426044fd8ce11[m
+Author: Mohan Sahu <mohanmppsc@gmail.com>
+Date:   Wed Aug 5 20:35:42 2026 +0530
+
+    Added a server and controlles health check
+
+[33mcommit b35bc5e869d7a4726a71045ca0c778f1ad103f33[m
+Author: VADLA VIDHYULLATHA <vidhyullathavadla055@gmail.com>
+Date:   Wed Aug 5 19:22:12 2026 +0530
+
+    Added React Flow canvas integration
+
+[33mcommit d0a31801ea7d42e49137948afa5f9b56242de370[m
+Merge: 9260895 904d557
+Author: VADLA VIDHYULLATHA <vidhyullathavadla055@gmail.com>
+Date:   Wed Aug 5 18:47:16 2026 +0530
+
+    Resolve README merge conflict
+
+[33mcommit 92608950e98201c2ecdd4dc838c60b2f8d18eda9[m
+Author: VADLA VIDHYULLATHA <vidhyullathavadla055@gmail.com>
+Date:   Wed Aug 5 18:23:07 2026 +0530
+
+    Initial NexusFlow frontend setup
+
+[33mcommit 4841064dce5162874d019c6116e6a6431e329c27[m[33m ([m[1;31morigin/krishna[m[33m, [m[1;32mkrishna[m[33m)[m
+Author: krishna <kkrkrishna515@gmail.com>
+Date:   Wed Aug 5 13:25:13 2026 +0530
+
+    Add NexusFlow backend
+
+[33mcommit 904d55747a5777e024be85f864b67f75521ecc8b[m
+Author: VADLA VIDHYULLATHA <vidhyullathavadla055@gmail.com>
+Date:   Tue Aug 4 14:38:24 2026 +0530
+
+    Initial commit
