@@ -12,6 +12,10 @@ import telemetryRoutes from "./routes/telemetry.routes.js";
 import deviceRoutes from "./routes/device.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import healthRoutes from "./routes/health.routes.js";
+import graphRoutes from "./routes/graph.routes.js";
+import alertRoutes from "./routes/alert.routes.js";
+import { notFound, errorHandler } from "./middleware/errorHandler.js";
+import { startAutoSimulator } from "./services/autoSimulator.js";
 
 async function start() {
   await connectDB();
@@ -32,10 +36,12 @@ async function start() {
   app.use("/api/auth", authRoutes);
   app.use("/api/health", healthRoutes);
 
-  app.use((err, req, res, next) => {
-    console.error(err);
-    res.status(500).json({ error: err.message || "Internal server error" });
-  });
+  // Krishna — Week 2/4 scope (previously built but never mounted)
+  app.use("/api/graph", graphRoutes);
+  app.use("/api/alerts", alertRoutes);
+
+  app.use(notFound);
+  app.use(errorHandler);
 
   // Day 4 — wrap app in a raw http server so WebSocket can attach to it
   const server = http.createServer(app);
@@ -52,6 +58,10 @@ async function start() {
     console.log(`[server] Auth           POST http://localhost:${env.port}/api/auth/signup`);
     console.log(`[server] Auth           POST http://localhost:${env.port}/api/auth/login`);
     console.log(`[server] Auth           GET  http://localhost:${env.port}/api/auth/me`);
+    console.log(`[server] Graphs         GET  http://localhost:${env.port}/api/graph`);
+    console.log(`[server] Alerts         GET  http://localhost:${env.port}/api/alerts`);
+
+    startAutoSimulator(); // begins pushing live demo telemetry unless AUTO_SIMULATE=false
   });
 }
 
