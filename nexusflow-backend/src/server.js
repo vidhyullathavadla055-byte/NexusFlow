@@ -12,7 +12,7 @@ import telemetryRoutes from "./routes/telemetry.routes.js";
 import deviceRoutes from "./routes/device.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import healthRoutes from "./routes/health.routes.js";
-
+import graphRoutes from "./routes/graph.routes.js";
 async function start() {
   await connectDB();
 
@@ -31,7 +31,7 @@ async function start() {
   // Krishna — Week 1 scope (Auth API, now wired up)
   app.use("/api/auth", authRoutes);
   app.use("/api/health", healthRoutes);
-
+  app.use("/api/graphs", graphRoutes); 
   app.use((err, req, res, next) => {
     console.error(err);
     res.status(500).json({ error: err.message || "Internal server error" });

@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
 import Layout from "./components/Layout";
+import Canvas from "./components/Canvas";
 
 import Dashboard from "./pages/Dashboard";
 import Activity from "./pages/Activity";
@@ -43,6 +44,7 @@ function AppRoutes() {
         }
       >
         <Route path="/" element={<Dashboard />} />
+        <Route path="/canvas" element={<Canvas />} />
         <Route path="/activity" element={<Activity />} />
         <Route path="/alerts" element={<Alerts />} />
         <Route path="/settings" element={<Settings />} />

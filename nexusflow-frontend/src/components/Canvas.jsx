@@ -1,4 +1,6 @@
 import { useCallback, useRef, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { api } from "../lib/api";
 import ReactFlow, {
   Background,
   Controls,
@@ -51,6 +53,7 @@ const initialEdges = [
 let idCounter = 4;
 
 function CanvasInner() {
+    const { token } = useAuth();
   const wrapperRef = useRef(null);
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -92,6 +95,24 @@ function CanvasInner() {
     },
     [reactFlowInstance, setNodes]
   );
+  const handleDeploy = async () => {
+  try {
+    const graph = await api.createGraph(
+      "Turbine Monitoring Pipeline",
+      nodes,
+      edges,
+      token
+    );
+
+    const graphId = graph._id;
+
+    await api.deployGraph(graphId, token);
+
+    alert("Graph deployed successfully!");
+  } catch (err) {
+    alert(`Deploy failed: ${err.message}`);
+  }
+};
 
   return (
     <div className="canvas-shell">
@@ -103,7 +124,7 @@ function CanvasInner() {
           <button
             type="button"
             className="canvas-deploy-btn"
-            onClick={() => alert("Graph deployed! (demo — will call the real Deploy API once the backend is wired up)")}
+            onClick={handleDeploy}
           >
             Deploy Graph
           </button>

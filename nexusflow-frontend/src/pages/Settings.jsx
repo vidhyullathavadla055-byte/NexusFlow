@@ -1,32 +1,29 @@
+import { useAuth } from "../context/AuthContext";
 import "./Dashboard.css";
 
 function Settings() {
+  const { user } = useAuth();
+
   return (
-    <div className="dash-main">
-      <div className="dash-heading">
+    <div className="page-shell">
+      <div className="page-heading">
         <h1>Settings</h1>
         <p>Manage your application settings.</p>
       </div>
 
-      <div style={{ background: "#fff", padding: "20px", borderRadius: "10px" }}>
-        <h3>Profile Settings</h3>
+      <div className="page-card">
+        <h3 style={{ margin: "0 0 16px", color: "#0f172a", fontSize: "16px", fontWeight: 700 }}>
+          Profile Settings
+        </h3>
 
-        <p>Name: Akshaya</p>
-        <p>Email: akshaya@example.com</p>
+        <p style={{ margin: "0 0 8px", fontSize: "14px", color: "#334155" }}>
+          <strong>Name:</strong> {user?.name || "—"}
+        </p>
+        <p style={{ margin: "0 0 20px", fontSize: "14px", color: "#334155" }}>
+          <strong>Email:</strong> {user?.email || "—"}
+        </p>
 
-        <button
-          style={{
-            marginTop: "15px",
-            padding: "10px 20px",
-            background: "#2563eb",
-            color: "#fff",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-          }}
-        >
-          Save Changes
-        </button>
+        <button className="settings-save-btn">Save Changes</button>
       </div>
     </div>
   );
