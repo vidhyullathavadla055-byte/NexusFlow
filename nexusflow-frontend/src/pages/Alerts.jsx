@@ -1,20 +1,28 @@
 import "./Dashboard.css";
 
+const alerts = [
+  { id: 1, message: "High Temperature",  device: "Turbine Sensor", severity: "high" },
+  { id: 2, message: "Low Pressure",      device: "Boiler Unit",    severity: "medium" },
+  { id: 3, message: "Sensor Offline",    device: "Machine 03",     severity: "low" },
+];
+
 function Alerts() {
   return (
-    <div className="dash-main">
-      <div className="dash-heading">
+    <div className="page-shell">
+      <div className="page-heading">
         <h1>Alerts</h1>
         <p>Monitor all active alerts.</p>
       </div>
 
-      <div style={{ background: "#fff", padding: "20px", borderRadius: "10px" }}>
-        <h3>🚨 Active Alerts</h3>
-
-        <ul>
-          <li>High Temperature - Turbine Sensor</li>
-          <li>Low Pressure - Boiler Unit</li>
-          <li>Sensor Offline - Machine 03</li>
+      <div className="page-card">
+        <ul className="alerts-list">
+          {alerts.map((alert) => (
+            <li key={alert.id} className={`alerts-item alerts-item--${alert.severity}`}>
+              <span className="alerts-dot" />
+              <span className="alerts-message">{alert.message}</span>
+              <span className="alerts-device">{alert.device}</span>
+            </li>
+          ))}
         </ul>
       </div>
     </div>

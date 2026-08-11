@@ -12,6 +12,7 @@ import telemetryRoutes from "./routes/telemetry.routes.js";
 import deviceRoutes from "./routes/device.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import healthRoutes from "./routes/health.routes.js";
+import graphRoutes from "./routes/graph.routes.js";
 import alertRoutes from "./routes/alert.routes.js";
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
 import { startAutoSimulator } from "./services/autoSimulator.js";
@@ -31,25 +32,25 @@ async function start() {
   app.use("/api/telemetry", telemetryRoutes);
   app.use("/api/devices", deviceRoutes);
 
-  // Krishna — Week 1 scope (Auth API, now wired up)
+  // Krishna — Auth & Health
   app.use("/api/auth", authRoutes);
   app.use("/api/health", healthRoutes);
 
-  // Krishna — Week 2/4 scope (previously built but never mounted)
+  // Akshaya — Graphs
+  app.use("/api/graphs", graphRoutes);
+
+  // Alerts
   app.use("/api/alerts", alertRoutes);
 
-  // NOTE: /api/graph is not mounted yet — only graphModel.js (schema) is
-  // built so far. graph.controller.js / graph.routes.js come next.
-
+  // Error handling
   app.use(notFound);
   app.use(errorHandler);
 
-  // Day 4 — wrap app in a raw http server so WebSocket can attach to it
   const server = http.createServer(app);
-  initWebSocket(server); // ws clients connect at ws://<host>:<port>/ws
+  initWebSocket(server);
 
   server.listen(env.port, () => {
-    console.log(`[server] NexusFlow backend (Week 1) listening on :${env.port}`);
+    console.log(`[server] NexusFlow backend listening on :${env.port}`);
     console.log(`[server] Health         http://localhost:${env.port}/health`);
     console.log(`[server] WebSocket      ws://localhost:${env.port}/ws`);
     console.log(`[server] Ingest         POST http://localhost:${env.port}/api/ingest`);
@@ -61,7 +62,7 @@ async function start() {
     console.log(`[server] Auth           GET  http://localhost:${env.port}/api/auth/me`);
     console.log(`[server] Alerts         GET  http://localhost:${env.port}/api/alerts`);
 
-    startAutoSimulator(); // begins pushing live demo telemetry unless AUTO_SIMULATE=false
+    startAutoSimulator();
   });
 }
 

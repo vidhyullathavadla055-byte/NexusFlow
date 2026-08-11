@@ -7,8 +7,12 @@ function Sidebar() {
       <h2 className="sidebar-logo">NexusFlow</h2>
 
       <nav className="sidebar-nav">
-        <NavLink to="/" className="sidebar-link">
+        <NavLink to="/" end className="sidebar-link">
           Dashboard
+        </NavLink>
+
+        <NavLink to="/canvas" className="sidebar-link">
+          Canvas
         </NavLink>
 
         <NavLink to="/activity" className="sidebar-link">
