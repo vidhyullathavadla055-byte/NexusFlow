@@ -28,7 +28,7 @@ export function initWebSocket(httpServer) {
             type: "telemetry",
             payload: {
                 deviceId: reading.deviceId,
-                label: device ?.label || reading.deviceId,
+                label: device?.label || reading.deviceId,
                 metric: reading.metric,
                 unit: reading.unit,
                 value: reading.value,
