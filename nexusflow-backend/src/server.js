@@ -12,7 +12,6 @@ import telemetryRoutes from "./routes/telemetry.routes.js";
 import deviceRoutes from "./routes/device.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import healthRoutes from "./routes/health.routes.js";
-import graphRoutes from "./routes/graph.routes.js";
 import alertRoutes from "./routes/alert.routes.js";
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
 import { startAutoSimulator } from "./services/autoSimulator.js";
@@ -37,8 +36,10 @@ async function start() {
   app.use("/api/health", healthRoutes);
 
   // Krishna — Week 2/4 scope (previously built but never mounted)
-  app.use("/api/graph", graphRoutes);
   app.use("/api/alerts", alertRoutes);
+
+  // NOTE: /api/graph is not mounted yet — only graphModel.js (schema) is
+  // built so far. graph.controller.js / graph.routes.js come next.
 
   app.use(notFound);
   app.use(errorHandler);
@@ -58,7 +59,6 @@ async function start() {
     console.log(`[server] Auth           POST http://localhost:${env.port}/api/auth/signup`);
     console.log(`[server] Auth           POST http://localhost:${env.port}/api/auth/login`);
     console.log(`[server] Auth           GET  http://localhost:${env.port}/api/auth/me`);
-    console.log(`[server] Graphs         GET  http://localhost:${env.port}/api/graph`);
     console.log(`[server] Alerts         GET  http://localhost:${env.port}/api/alerts`);
 
     startAutoSimulator(); // begins pushing live demo telemetry unless AUTO_SIMULATE=false
