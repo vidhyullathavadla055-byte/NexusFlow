@@ -61,6 +61,7 @@ async function start() {
     console.log(`[server] Auth           POST http://localhost:${env.port}/api/auth/login`);
     console.log(`[server] Auth           GET  http://localhost:${env.port}/api/auth/me`);
     console.log(`[server] Alerts         GET  http://localhost:${env.port}/api/alerts`);
+    console.log(`[server] Graphs         GET  http://localhost:${env.port}/api/graphs`);
 
     startAutoSimulator();
   });
