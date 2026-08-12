@@ -338,3 +338,43 @@
     width: 200px;
   }
 }
+.canvas-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.canvas-save-btn {
+  pointer-events: auto;
+
+  border: none;
+  border-radius: 8px;
+
+  padding: 9px 16px;
+
+  background: #2563eb;
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.canvas-save-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+
+  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.3);
+}
+
+.canvas-save-btn:active {
+  transform: translateY(0);
+}
