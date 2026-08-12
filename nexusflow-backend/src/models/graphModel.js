@@ -3,9 +3,9 @@ import { ObjectId } from "mongodb";
 
 const COLLECTION = "graphs";
 
-export async function saveGraph({ name, nodes, edges, status = "draft" }) {
+export async function saveGraph({ name, nodes, edges, status = "draft", owner }) {
   const now = new Date();
-  const doc = { name, nodes, edges, status, createdAt: now, updatedAt: now };
+  const doc = { name, nodes, edges, status, owner, createdAt: now, updatedAt: now };
   const result = await getDb().collection(COLLECTION).insertOne(doc);
   return { _id: result.insertedId, ...doc };
 }
@@ -27,8 +27,10 @@ export async function getGraph(id) {
   return getDb().collection(COLLECTION).findOne({ _id: new ObjectId(id) });
 }
 
-export async function listGraphs() {
-  return getDb().collection(COLLECTION).find().sort({ updatedAt: -1 }).toArray();
+/** Scoped to one user by default — pass no owner only for internal/admin use. */
+export async function listGraphs({ owner } = {}) {
+  const query = owner ? { owner } : {};
+  return getDb().collection(COLLECTION).find(query).sort({ updatedAt: -1 }).toArray();
 }
 
 export async function deleteGraph(id) {

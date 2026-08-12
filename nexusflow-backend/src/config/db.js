@@ -54,6 +54,7 @@ async function ensureTimeSeriesCollection() {
 
 async function ensureSupportingCollections() {
   await db.collection("graphs").createIndex({ updatedAt: -1 });
+  await db.collection("graphs").createIndex({ owner: 1 }); // Krishna — Week 2 Day 3: per-user graph scoping
   await db.collection("alerts").createIndex({ createdAt: -1 });
   await db.collection("alerts").createIndex({ deviceId: 1 });
   await ensureUserIndexes(); // Krishna — unique index on users.email

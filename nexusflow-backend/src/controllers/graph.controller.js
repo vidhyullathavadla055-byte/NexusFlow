@@ -125,6 +125,26 @@ function validateGraphShape({ nodes, edges }) {
   return problems;
 }
 
+/**
+ * Fetches a graph and confirms the requesting user owns it, sending the
+ * right error response itself (404 if it doesn't exist, 403 if it belongs
+ * to someone else) and returning null so callers can just `if (!graph) return;`.
+ * Graphs saved before ownership existed (owner is undefined) stay
+ * accessible to everyone rather than becoming orphaned.
+ */
+async function loadOwnedGraph(req, res) {
+  const graph = await getGraph(req.params.id);
+  if (!graph) {
+    res.status(404).json({ error: "Graph not found." });
+    return null;
+  }
+  if (graph.owner && graph.owner !== req.userId) {
+    res.status(403).json({ error: "You don't have access to this graph." });
+    return null;
+  }
+  return graph;
+}
+
 export async function create(req, res, next) {
   try {
     const { name, nodes, edges, status } = req.body;
@@ -138,7 +158,7 @@ export async function create(req, res, next) {
       return res.status(400).json({ error: "Graph failed validation.", details: problems });
     }
 
-    const graph = await saveGraph({ name: name || "Untitled Graph", nodes: normalizedNodes, edges, status });
+    const graph = await saveGraph({ name: name || "Untitled Graph", nodes: normalizedNodes, edges, status, owner: req.userId });
     res.status(201).json(graph);
   } catch (err) {
     next(err);
@@ -147,7 +167,7 @@ export async function create(req, res, next) {
 
 export async function list(req, res, next) {
   try {
-    res.json(await listGraphs());
+    res.json(await listGraphs({ owner: req.userId }));
   } catch (err) {
     next(err);
   }
@@ -155,8 +175,8 @@ export async function list(req, res, next) {
 
 export async function getOne(req, res, next) {
   try {
-    const graph = await getGraph(req.params.id);
-    if (!graph) return res.status(404).json({ error: "Graph not found." });
+    const graph = await loadOwnedGraph(req, res);
+    if (!graph) return;
     res.json(graph);
   } catch (err) {
     next(err);
@@ -165,6 +185,9 @@ export async function getOne(req, res, next) {
 
 export async function update(req, res, next) {
   try {
+    const existing = await loadOwnedGraph(req, res);
+    if (!existing) return;
+
     const { nodes, edges } = req.body;
     const body = { ...req.body };
 
@@ -177,7 +200,6 @@ export async function update(req, res, next) {
     }
 
     const graph = await updateGraph(req.params.id, body);
-    if (!graph) return res.status(404).json({ error: "Graph not found." });
     if (isRunning(req.params.id)) deployGraph(req.params.id, graph); // hot-reload a live pipeline
     res.json(graph);
   } catch (err) {
@@ -187,6 +209,9 @@ export async function update(req, res, next) {
 
 export async function remove(req, res, next) {
   try {
+    const graph = await loadOwnedGraph(req, res);
+    if (!graph) return;
+
     stopGraph(req.params.id);
     await deleteGraph(req.params.id);
     res.status(204).send();
@@ -197,8 +222,8 @@ export async function remove(req, res, next) {
 
 export async function deploy(req, res, next) {
   try {
-    const graph = await getGraph(req.params.id);
-    if (!graph) return res.status(404).json({ error: "Graph not found." });
+    const graph = await loadOwnedGraph(req, res);
+    if (!graph) return;
 
     const result = deployGraph(req.params.id, graph);
     await updateGraph(req.params.id, { status: "running" });
@@ -215,6 +240,9 @@ export async function deploy(req, res, next) {
 
 export async function stop(req, res, next) {
   try {
+    const graph = await loadOwnedGraph(req, res);
+    if (!graph) return;
+
     const stopped = stopGraph(req.params.id);
     await updateGraph(req.params.id, { status: "stopped" });
     res.json({ ok: true, stopped });
