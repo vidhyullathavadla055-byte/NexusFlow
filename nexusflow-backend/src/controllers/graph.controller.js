@@ -84,7 +84,27 @@ function normalizeNodes(nodes) {
  */
 function validateGraphShape({ nodes, edges }) {
   const problems = [];
+
+  // Day-4 addition: an empty pipeline is never deployable — catch it here
+  // instead of letting it fail later inside the Stream Compiler with a
+  // confusing error.
+  if (nodes.length === 0) {
+    problems.push("Graph has no nodes — add at least a Data Source and an Action node.");
+    return problems;
+  }
+
   const nodeIds = new Set(nodes.map((n) => n.id));
+
+  // Day-4 addition: duplicate node ids silently corrupt the adjacency map
+  // built below (later nodes overwrite earlier ones), which used to let
+  // broken graphs slip past validation. Catch it explicitly instead.
+  const seenIds = new Set();
+  for (const node of nodes) {
+    if (node.id && seenIds.has(node.id)) {
+      problems.push(`Duplicate node id "${node.id}" — each node must have a unique id.`);
+    }
+    seenIds.add(node.id);
+  }
 
   for (const node of nodes) {
     if (!node.id) problems.push("A node is missing an id.");
@@ -94,6 +114,7 @@ function validateGraphShape({ nodes, edges }) {
   }
 
   const adjacency = new Map(nodes.map((n) => [n.id, []]));
+  const connected = new Set();
   for (const edge of edges) {
     if (!nodeIds.has(edge.source) || !nodeIds.has(edge.target)) {
       problems.push(
@@ -102,6 +123,21 @@ function validateGraphShape({ nodes, edges }) {
       continue;
     }
     adjacency.get(edge.source).push(edge.target);
+    connected.add(edge.source);
+    connected.add(edge.target);
+  }
+
+  // Day-4 addition: flag nodes that aren't wired into the pipeline at all.
+  // A dataSource/mathOp/action dropped on the canvas but never connected
+  // would otherwise save "successfully" and just silently do nothing at
+  // deploy time. Only fires when there's more than one node, since a
+  // single-node graph has nothing to connect to yet.
+  if (nodes.length > 1) {
+    for (const node of nodes) {
+      if (node.id && !connected.has(node.id)) {
+        problems.push(`Node "${node.id}" isn't connected to anything — link it to the pipeline or remove it.`);
+      }
+    }
   }
 
   const WHITE = 0, GRAY = 1, BLACK = 2;
