@@ -22,11 +22,13 @@ import NodePalette from "./NodePalette";
 import SensorNode from "./nodes/SensorNode";
 import FilterNode from "./nodes/FilterNode";
 import ActionNode from "./nodes/ActionNode";
+import WebhookNode from "./nodes/WebhookNode";
 
 const nodeTypes = {
   sensor: SensorNode,
   filter: FilterNode,
   action: ActionNode,
+  webhook: WebhookNode,
 };
 
 const initialNodes = [

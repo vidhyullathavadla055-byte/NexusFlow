@@ -12,7 +12,7 @@ import telemetryRoutes from "./routes/telemetry.routes.js";
 import deviceRoutes from "./routes/device.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import healthRoutes from "./routes/health.routes.js";
-import graphRoutes from "./routes/graph.routes.js";
+//import graphRoutes from "./routes/graph.routes.js";
 import alertRoutes from "./routes/alert.routes.js";
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
 import { startAutoSimulator } from "./services/autoSimulator.js";
@@ -37,7 +37,7 @@ async function start() {
   app.use("/api/health", healthRoutes);
 
   // Akshaya — Graphs
-  app.use("/api/graphs", graphRoutes);
+  //app.use("/api/graphs", graphRoutes);
 
   // Alerts
   app.use("/api/alerts", alertRoutes);
