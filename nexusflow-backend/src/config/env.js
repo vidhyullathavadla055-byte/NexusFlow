@@ -4,7 +4,9 @@ export const env = {
   port: Number(process.env.PORT) || 4000,
   mongoUri: process.env.MONGO_URI || "mongodb://localhost:27017",
   mongoDbName: process.env.MONGO_DB_NAME || "nexusflow",
-  corsOrigin: process.env.CORS_ORIGIN || "http://localhost:5173",
+  corsOrigin: process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(",").map((o) => o.trim())
+    : ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175"],
   smsProviderMode: process.env.SMS_PROVIDER_MODE || "mock",
   webhookTimeoutMs: Number(process.env.WEBHOOK_TIMEOUT_MS) || 5000,
   twilioSid: process.env.TWILIO_ACCOUNT_SID || "",

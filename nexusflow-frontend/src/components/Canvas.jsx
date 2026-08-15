@@ -1,4 +1,9 @@
-import { useCallback, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../lib/api";
 import ReactFlow, {
@@ -17,11 +22,13 @@ import NodePalette from "./NodePalette";
 import SensorNode from "./nodes/SensorNode";
 import FilterNode from "./nodes/FilterNode";
 import ActionNode from "./nodes/ActionNode";
+import WebhookNode from "./nodes/WebhookNode";
 
 const nodeTypes = {
   sensor: SensorNode,
   filter: FilterNode,
   action: ActionNode,
+  webhook: WebhookNode,
 };
 
 const initialNodes = [
@@ -29,105 +36,225 @@ const initialNodes = [
     id: "1",
     type: "sensor",
     position: { x: 40, y: 140 },
-    data: { label: "Turbine Sensor", sub: "Data Source · WebSocket" },
+    data: {
+      label: "Turbine Sensor",
+      sub: "Data Source · WebSocket",
+    },
   },
   {
     id: "2",
     type: "filter",
     position: { x: 360, y: 140 },
-    data: { label: "Moving Average", sub: "Filter · window = 10" },
+    data: {
+      label: "Moving Average",
+      sub: "Filter · window = 10",
+    },
   },
   {
     id: "3",
     type: "action",
     position: { x: 680, y: 140 },
-    data: { label: "SMS Alert", sub: "Action · threshold > 80°C" },
+    data: {
+      label: "SMS Alert",
+      sub: "Action · threshold > 80°C",
+    },
   },
 ];
 
 const initialEdges = [
-  { id: "e1-2", source: "1", target: "2", animated: true, className: "glow-edge" },
-  { id: "e2-3", source: "2", target: "3", animated: true, className: "glow-edge" },
+  {
+    id: "e1-2",
+    source: "1",
+    target: "2",
+    animated: true,
+    className: "glow-edge",
+  },
+  {
+    id: "e2-3",
+    source: "2",
+    target: "3",
+    animated: true,
+    className: "glow-edge",
+  },
 ];
 
-let idCounter = 4;
+
 
 function CanvasInner() {
-    const { token } = useAuth();
+  const { token } = useAuth();
+
   const wrapperRef = useRef(null);
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const [reactFlowInstance, setReactFlowInstance] = useState(null);
+
+  const [nodes, setNodes, onNodesChange] =
+    useNodesState(initialNodes);
+
+  const [edges, setEdges, onEdgesChange] =
+    useEdgesState(initialEdges);
+
+  const [reactFlowInstance, setReactFlowInstance] =
+    useState(null);
+
   const [selected, setSelected] = useState(null);
 
+  // Restore saved graph when Canvas opens
+  useEffect(() => {
+    const savedGraph =
+      localStorage.getItem("nexusflow_graph");
+
+    if (!savedGraph) {
+      return;
+    }
+
+    try {
+      const graph = JSON.parse(savedGraph);
+
+      setNodes(graph.nodes || []);
+      setEdges(graph.edges || []);
+
+      console.log("Graph restored:", graph);
+    } catch (error) {
+      console.error(
+        "Failed to restore graph:",
+        error
+      );
+    }
+  }, [setNodes, setEdges]);
+
+  // Connect nodes
   const onConnect = useCallback(
     (params) =>
-      setEdges((eds) => addEdge({ ...params, animated: true, className: "glow-edge" }, eds)),
+      setEdges((eds) =>
+        addEdge(
+          {
+            ...params,
+            animated: true,
+            className: "glow-edge",
+          },
+          eds
+        )
+      ),
     [setEdges]
   );
 
+  // Allow dropping nodes
   const onDragOver = useCallback((event) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
   }, []);
 
+  // Drop node onto Canvas
   const onDrop = useCallback(
     (event) => {
       event.preventDefault();
-      const type = event.dataTransfer.getData("application/nexusflow-node-type");
-      const label = event.dataTransfer.getData("application/nexusflow-node-label");
-      const hint = event.dataTransfer.getData("application/nexusflow-node-hint");
-      if (!type || !reactFlowInstance || !wrapperRef.current) return;
 
-      const bounds = wrapperRef.current.getBoundingClientRect();
-      const position = reactFlowInstance.project({
-        x: event.clientX - bounds.left,
-        y: event.clientY - bounds.top,
-      });
+      const type = event.dataTransfer.getData(
+        "application/nexusflow-node-type"
+      );
+
+      const label = event.dataTransfer.getData(
+        "application/nexusflow-node-label"
+      );
+
+      const hint = event.dataTransfer.getData(
+        "application/nexusflow-node-hint"
+      );
+
+      if (
+        !type ||
+        !reactFlowInstance ||
+        !wrapperRef.current
+      ) {
+        return;
+      }
+
+      const bounds =
+        wrapperRef.current.getBoundingClientRect();
+
+      const position =
+        reactFlowInstance.project({
+          x: event.clientX - bounds.left,
+          y: event.clientY - bounds.top,
+        });
 
       const newNode = {
-        id: `${idCounter++}`,
+        id: `${Date.now()}`,
         type,
         position,
-        data: { label: label || "New Node", sub: hint || "" },
+        data: {
+          label: label || "New Node",
+          sub: hint || "",
+        },
       };
+
       setNodes((nds) => nds.concat(newNode));
     },
     [reactFlowInstance, setNodes]
   );
-  const handleDeploy = async () => {
-  try {
-    const graph = await api.createGraph(
-      "Turbine Monitoring Pipeline",
+
+  // Save graph to localStorage
+  const saveGraphToLocalStorage = () => {
+    const graph = {
       nodes,
       edges,
-      token
+    };
+
+    localStorage.setItem(
+      "nexusflow_graph",
+      JSON.stringify(graph)
     );
 
-    const graphId = graph._id;
+    console.log("Graph saved:", graph);
 
-    await api.deployGraph(graphId, token);
+    alert("Pipeline saved successfully!");
+  };
 
-    alert("Graph deployed successfully!");
-  } catch (err) {
-    alert(`Deploy failed: ${err.message}`);
-  }
-};
+  // Deploy graph
+  const handleDeploy = async () => {
+    try {
+      const graph = await api.createGraph(
+        "Turbine Monitoring Pipeline",
+        nodes,
+        edges,
+        token
+      );
+
+      const graphId = graph._id;
+
+      await api.deployGraph(graphId, token);
+
+      alert("Graph deployed successfully!");
+    } catch (err) {
+      alert(`Deploy failed: ${err.message}`);
+    }
+  };
 
   return (
     <div className="canvas-shell">
       <NodePalette />
 
-      <div className="canvas-area" ref={wrapperRef}>
+      <div
+        className="canvas-area"
+        ref={wrapperRef}
+      >
         <div className="canvas-toolbar">
-          <span className="canvas-toolbar-title">Pipeline Canvas</span>
-          <button
-            type="button"
-            className="canvas-deploy-btn"
-            onClick={handleDeploy}
-          >
-            Deploy Graph
-          </button>
+          <span className="canvas-toolbar-title">
+            Pipeline Canvas
+          </span>
+
+          <div className="canvas-toolbar-actions">
+            
+
+            <button
+  type="button"
+  className="canvas-save-btn"
+  onClick={() => {
+    console.log("SAVE BUTTON CLICKED");
+    saveGraphToLocalStorage();
+  }}
+>
+  Save Pipeline
+</button>
+          </div>
         </div>
 
         <ReactFlow
@@ -139,32 +266,63 @@ function CanvasInner() {
           onInit={setReactFlowInstance}
           onDrop={onDrop}
           onDragOver={onDragOver}
-          onNodeClick={(_, node) => setSelected(node)}
-          onPaneClick={() => setSelected(null)}
+          onNodeClick={(_, node) =>
+            setSelected(node)
+          }
+          onPaneClick={() =>
+            setSelected(null)
+          }
           nodeTypes={nodeTypes}
           fitView
-          proOptions={{ hideAttribution: true }}
+          proOptions={{
+            hideAttribution: true,
+          }}
         >
-          <MiniMap pannable zoomable className="canvas-minimap" />
+          <MiniMap
+            pannable
+            zoomable
+            className="canvas-minimap"
+          />
+
           <Controls />
-          <Background gap={22} size={1} color="#dbe2ea" />
+
+          <Background
+            gap={22}
+            size={1}
+            color="#dbe2ea"
+          />
         </ReactFlow>
 
         <div className="canvas-hint">
           <span className="canvas-hint-dot" />
-          Live data flowing — wires glow while telemetry passes through
+          Live data flowing — wires glow while
+          telemetry passes through
         </div>
 
         {selected && (
           <div className="canvas-inspector">
             <div className="canvas-inspector-head">
-              <span className="canvas-inspector-label">Selected Node</span>
-              <button type="button" onClick={() => setSelected(null)}>
+              <span className="canvas-inspector-label">
+                Selected Node
+              </span>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setSelected(null)
+                }
+              >
                 ✕
               </button>
             </div>
-            <h4>{selected.data.label}</h4>
-            <p>{selected.data.sub}</p>
+
+            <h4>
+              {selected.data.label}
+            </h4>
+
+            <p>
+              {selected.data.sub}
+            </p>
           </div>
         )}
       </div>

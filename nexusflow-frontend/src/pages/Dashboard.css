@@ -195,3 +195,80 @@
 .dash-heading { margin-bottom: 22px; }
 .dash-heading h1 { margin: 0 0 6px; color: #0f172a; font-size: 24px; font-weight: 700; }
 .dash-heading p  { margin: 0; color: #64748b; font-size: 14px; }
+/* ── Dashboard KPI Cards ── */
+
+.dashboard-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+  margin-bottom: 28px;
+}
+
+.dashboard-kpi-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 18px;
+  box-sizing: border-box;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+.dashboard-kpi-label {
+  display: block;
+  margin-bottom: 10px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.dashboard-kpi-value {
+  display: block;
+  margin-bottom: 5px;
+  color: #0f172a;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.dashboard-kpi-sub {
+  display: block;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+/* ── Dashboard Canvas Section ── */
+
+.dashboard-canvas-section {
+  width: 100%;
+}
+
+.dashboard-section-heading {
+  margin-bottom: 12px;
+}
+
+.dashboard-section-heading h2 {
+  margin: 0 0 5px;
+  color: #0f172a;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.dashboard-section-heading p {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+/* ── Responsive Dashboard ── */
+
+@media (max-width: 900px) {
+  .dashboard-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
