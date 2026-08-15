@@ -78,7 +78,7 @@ const initialEdges = [
   },
 ];
 
-let idCounter = 4;
+
 
 function CanvasInner() {
   const { token } = useAuth();
@@ -177,7 +177,7 @@ function CanvasInner() {
         });
 
       const newNode = {
-        id: `${idCounter++}`,
+        id: `${Date.now()}`,
         type,
         position,
         data: {

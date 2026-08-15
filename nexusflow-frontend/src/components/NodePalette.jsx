@@ -6,7 +6,7 @@ const ITEMS = [
   { type: "filter", label: "Moving Average", hint: "Filter", color: "green" },
   { type: "filter", label: "Math Operation", hint: "Filter", color: "green" },
   { type: "action", label: "SMS Alert", hint: "Action Trigger", color: "red" },
-  { type: "action", label: "Webhook Trigger", hint: "Action Trigger", color: "red" },
+  { type: "webhook", label: "Webhook Trigger", hint: "Action Trigger", color: "red" },
 ];
 
 function NodePalette() {
