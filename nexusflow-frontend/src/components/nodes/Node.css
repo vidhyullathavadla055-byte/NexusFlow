@@ -1,0 +1,62 @@
+.flow-node {
+  min-width: 190px;
+  background: #fff;
+  border-radius: 10px;
+  border: 2px solid #cbd5e1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+  transition: box-shadow 0.15s, transform 0.1s;
+}
+
+.flow-node:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.flow-node.selected,
+.react-flow__node.selected .flow-node {
+  transform: translateY(-1px);
+}
+
+.flow-node-bar {
+  height: 6px;
+  width: 100%;
+}
+
+.flow-node-body {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.flow-node-body strong {
+  font-size: 13.5px;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.flow-node-body small {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.flow-node--blue { border-color: #2563eb; }
+.flow-node--blue .flow-node-bar { background: #2563eb; }
+
+.flow-node--green { border-color: #10b981; }
+.flow-node--green .flow-node-bar { background: #10b981; }
+
+.flow-node--red { border-color: #ef4444; }
+.flow-node--red .flow-node-bar { background: #ef4444; }
+
+.react-flow__handle {
+  width: 10px;
+  height: 10px;
+  border: 2px solid #fff;
+}
+
+.flow-node--blue ~ .react-flow__handle,
+.react-flow__node .flow-node--blue + .react-flow__handle {
+  background: #2563eb;
+}

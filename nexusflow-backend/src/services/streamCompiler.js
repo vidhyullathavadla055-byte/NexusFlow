@@ -15,85 +15,85 @@ import { rollingAverage, threshold, derivative } from "./operators/customOperato
  * deployed graph reacts to hardware data the instant it's pushed onto the
  * bus by the Ingestion API.
  */
-export function compileGraph( graph ) {
-  const nodesById = new Map( graph.nodes.map( ( n ) => [ n.id, n ] ) );
+export function compileGraph(graph) {
+  const nodesById = new Map(graph.nodes.map((n) => [n.id, n]));
   const incomingByTarget = new Map();
-  for ( const edge of graph.edges ) {
-    const list = incomingByTarget.get( edge.target ) || [];
-    list.push( edge.source );
-    incomingByTarget.set( edge.target, list );
+  for (const edge of graph.edges) {
+    const list = incomingByTarget.get(edge.target) || [];
+    list.push(edge.source);
+    incomingByTarget.set(edge.target, list);
   }
 
   const cache = new Map();
   const visiting = new Set();
 
-  function build( nodeId ) {
-    if ( cache.has( nodeId ) ) return cache.get( nodeId );
-    if ( visiting.has( nodeId ) ) {
-      throw new Error( `Stream Compiler: cycle detected at node "${nodeId}" — rule graphs must be acyclic.` );
+  function build(nodeId) {
+    if (cache.has(nodeId)) return cache.get(nodeId);
+    if (visiting.has(nodeId)) {
+      throw new Error(`Stream Compiler: cycle detected at node "${nodeId}" — rule graphs must be acyclic.`);
     }
-    visiting.add( nodeId );
+    visiting.add(nodeId);
 
-    const node = nodesById.get( nodeId );
-    if ( !node ) throw new Error( `Stream Compiler: edge references missing node "${nodeId}".` );
+    const node = nodesById.get(nodeId);
+    if (!node) throw new Error(`Stream Compiler: edge references missing node "${nodeId}".`);
 
     let obs$;
 
-    if ( node.type === "dataSource" ) {
-      obs$ = buildDataSource( node );
+    if (node.type === "dataSource") {
+      obs$ = buildDataSource(node);
     } else {
-      const upstreamIds = incomingByTarget.get( nodeId ) || [];
-      if ( upstreamIds.length === 0 ) {
-        throw new Error( `Stream Compiler: node "${node.data?.label || nodeId}" has no input connected.` );
+      const upstreamIds = incomingByTarget.get(nodeId) || [];
+      if (upstreamIds.length === 0) {
+        throw new Error(`Stream Compiler: node "${node.data?.label || nodeId}" has no input connected.`);
       }
-      const upstreams = upstreamIds.map( build );
-      const merged = upstreams.length > 1 ? combineLatest( upstreams ) : upstreams[ 0 ];
+      const upstreams = upstreamIds.map(build);
+      const merged = upstreams.length > 1 ? combineLatest(upstreams) : upstreams[0];
 
-      if ( node.type === "mathOp" ) {
-        obs$ = buildMathOp( merged, node );
-      } else if ( node.type === "action" ) {
+      if (node.type === "mathOp") {
+        obs$ = buildMathOp(merged, node);
+      } else if (node.type === "action") {
         obs$ = merged; // pass-through — subscription/side-effect happens in the runner
       } else {
-        throw new Error( `Stream Compiler: unknown node type "${node.type}".` );
+        throw new Error(`Stream Compiler: unknown node type "${node.type}".`);
       }
     }
 
-    visiting.delete( nodeId );
-    cache.set( nodeId, obs$ );
+    visiting.delete(nodeId);
+    cache.set(nodeId, obs$);
     return obs$;
   }
 
-  const actionNodes = graph.nodes.filter( ( n ) => n.type === "action" );
-  if ( actionNodes.length === 0 ) {
-    throw new Error( "Stream Compiler: graph has no Action Trigger node — nothing would ever fire." );
+  const actionNodes = graph.nodes.filter((n) => n.type === "action");
+  if (actionNodes.length === 0) {
+    throw new Error("Stream Compiler: graph has no Action Trigger node — nothing would ever fire.");
   }
 
   // { node, observable } pairs the caller subscribes to.
-  return actionNodes.map( ( node ) => ( { node, observable: build( node.id ) } ) );
+  return actionNodes.map((node) => ({ node, observable: build(node.id) }));
 }
 
-function buildDataSource( node ) {
+function buildDataSource(node) {
   const { deviceId } = node.data;
-  if ( !deviceId ) throw new Error( `Stream Compiler: Data Source "${node.data?.label}" has no deviceId configured.` );
+  if (!deviceId) throw new Error(`Stream Compiler: Data Source "${node.data?.label}" has no deviceId configured.`);
   // Only let this node's own device readings through — this is what makes
   // the shared bus behave like a dedicated per-sensor stream downstream.
   return telemetry$.pipe(
-    filter( ( reading ) => reading.deviceId === deviceId ),
-    map( ( reading ) => reading.value )
+    filter((reading) => reading.deviceId === deviceId),
+    map((reading) => reading.value)
   );
 }
 
-function buildMathOp( source$, node ) {
+function buildMathOp(source$, node) {
   const { operation, window } = node.data;
-  switch ( operation ) {
+  switch (operation) {
     case "Moving Average":
-      return source$.pipe( rollingAverage( Number( window ) || 10 ) );
+      return source$.pipe(rollingAverage(Number(window) || 10));
     case "Threshold >":
     case "Threshold <":
-      return source$.pipe( threshold( operation, Number( window ) ) );
+      return source$.pipe(threshold(operation, Number(window)));
     case "Derivative":
-      return source$.pipe( derivative() );
+      return source$.pipe(derivative());
     default:
-      throw new Error( `Stream Compiler: unknown Math Operation "${operation}".` );
+      throw new Error(`Stream Compiler: unknown Math Operation "${operation}".`);
   }
 }

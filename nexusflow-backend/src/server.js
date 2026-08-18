@@ -6,11 +6,16 @@ import morgan from "morgan";
 import { env } from "./config/env.js";
 import { connectDB } from "./config/db.js";
 import { initWebSocket } from "./websocket/wsServer.js";
-import { notFound, errorHandler } from "./middleware/errorHandler.js";
 
 import ingestRoutes from "./routes/ingest.routes.js";
 import telemetryRoutes from "./routes/telemetry.routes.js";
 import deviceRoutes from "./routes/device.routes.js";
+import authRoutes from "./routes/auth.routes.js";
+import healthRoutes from "./routes/health.routes.js";
+import graphRoutes from "./routes/graph.routes.js";
+import alertRoutes from "./routes/alert.routes.js";
+import { notFound, errorHandler } from "./middleware/errorHandler.js";
+import { startAutoSimulator } from "./services/autoSimulator.js";
 
 async function start() {
   await connectDB();
@@ -27,27 +32,38 @@ async function start() {
   app.use("/api/telemetry", telemetryRoutes);
   app.use("/api/devices", deviceRoutes);
 
-  // NOTE for team: mount auth.routes.js here once Krishna's Week-2
-  // middleware/authMiddleware.js is ready (auth.routes.js needs requireAuth).
-  // e.g. app.use("/api/auth", authRoutes);
+  // Krishna — Auth & Health
+  app.use("/api/auth", authRoutes);
+  app.use("/api/health", healthRoutes);
 
-  // Day 9 — centralized 404 + error handling (replaces the old inline
-  // error handler). Must be mounted AFTER all routes.
+  // Akshaya — Graphs
+  app.use("/api/graphs", graphRoutes);
+
+  // Alerts
+  app.use("/api/alerts", alertRoutes);
+
+  // Error handling
   app.use(notFound);
   app.use(errorHandler);
 
-  // Day 4 — wrap app in a raw http server so WebSocket can attach to it
   const server = http.createServer(app);
-  initWebSocket(server); // ws clients connect at ws://<host>:<port>/ws
+  initWebSocket(server);
 
   server.listen(env.port, () => {
-    console.log(`[server] NexusFlow backend (Week 1) listening on :${env.port}`);
+    console.log(`[server] NexusFlow backend listening on :${env.port}`);
     console.log(`[server] Health         http://localhost:${env.port}/health`);
     console.log(`[server] WebSocket      ws://localhost:${env.port}/ws`);
     console.log(`[server] Ingest         POST http://localhost:${env.port}/api/ingest`);
     console.log(`[server] Ingest bulk    POST http://localhost:${env.port}/api/ingest/bulk`);
     console.log(`[server] Telemetry      GET  http://localhost:${env.port}/api/telemetry/stats`);
     console.log(`[server] Devices        GET  http://localhost:${env.port}/api/devices`);
+    console.log(`[server] Auth           POST http://localhost:${env.port}/api/auth/signup`);
+    console.log(`[server] Auth           POST http://localhost:${env.port}/api/auth/login`);
+    console.log(`[server] Auth           GET  http://localhost:${env.port}/api/auth/me`);
+    console.log(`[server] Alerts         GET  http://localhost:${env.port}/api/alerts`);
+    console.log(`[server] Graphs         GET  http://localhost:${env.port}/api/graphs`);
+
+    startAutoSimulator();
   });
 }
 
