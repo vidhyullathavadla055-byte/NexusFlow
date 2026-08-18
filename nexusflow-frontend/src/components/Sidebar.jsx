@@ -15,6 +15,10 @@ function Sidebar() {
           Canvas
         </NavLink>
 
+        <NavLink to="/pipelines" className="sidebar-link">
+          Pipelines
+        </NavLink>
+
         <NavLink to="/activity" className="sidebar-link">
           Activity
         </NavLink>

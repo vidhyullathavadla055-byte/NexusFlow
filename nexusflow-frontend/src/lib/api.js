@@ -69,4 +69,23 @@ export const api = {
       method: "POST",
       token,
     }),
+
+  updateGraph: (graphId, body, token) =>
+    request(`/graphs/${graphId}`, {
+      method: "PUT",
+      body,
+      token,
+    }),
+
+  listGraphs: (token) => request("/graphs", { token }),
+
+  // Devices — powers the Inspector's device dropdown and the "Devices
+  // Online" KPI. No auth required (matches device.routes.js).
+  getDevices: () => request("/devices"),
+
+  // Alerts — powers the "Alerts Today" KPI on the Dashboard.
+  listAlerts: (token) => request("/alerts", { token }),
+
+  // Telemetry stats — powers the "Ingest Rate" KPI on the Dashboard.
+  getTelemetryStats: (token) => request("/telemetry/stats", { token }),
 };

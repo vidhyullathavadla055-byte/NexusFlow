@@ -63,6 +63,37 @@
   pointer-events: auto;
 }
 
+.canvas-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  pointer-events: auto;
+}
+
+.canvas-toolbar-actions button:not(.canvas-deploy-btn) {
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+
+  background: #ffffff;
+  color: #475569;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.canvas-toolbar-actions button:not(.canvas-deploy-btn):hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+.canvas-toolbar-actions button:not(.canvas-deploy-btn):disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .canvas-deploy-btn {
   pointer-events: auto;
 
@@ -96,6 +127,12 @@
 
 .canvas-deploy-btn:active {
   transform: translateY(0);
+}
+
+.canvas-deploy-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* Live status */
