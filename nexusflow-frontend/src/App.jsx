@@ -7,6 +7,7 @@ import Layout from "./components/Layout";
 import Canvas from "./components/Canvas";
 
 import Dashboard from "./pages/Dashboard";
+import GraphsPage from "./pages/GraphsPage";
 import Activity from "./pages/Activity";
 import Alerts from "./pages/Alerts";
 import Settings from "./pages/Settings";
@@ -45,6 +46,7 @@ function AppRoutes() {
       >
         <Route path="/" element={<Dashboard />} />
         <Route path="/canvas" element={<Canvas />} />
+        <Route path="/pipelines" element={<GraphsPage />} />
         <Route path="/activity" element={<Activity />} />
         <Route path="/alerts" element={<Alerts />} />
         <Route path="/settings" element={<Settings />} />

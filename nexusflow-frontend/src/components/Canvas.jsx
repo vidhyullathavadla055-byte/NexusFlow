@@ -1,6 +1,7 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../lib/api";
+import { useGraphHistory, toJSON } from "../lib/useGraphHistory";
 import ReactFlow, {
   Background,
   Controls,
@@ -14,34 +15,40 @@ import "reactflow/dist/style.css";
 import "./Canvas.css";
 
 import NodePalette from "./NodePalette";
-import SensorNode from "./nodes/SensorNode";
-import FilterNode from "./nodes/FilterNode";
+import Inspector from "./Inspector";
+import DataSourceNode from "./nodes/SensorNode";
+import MathOpNode from "./nodes/FilterNode";
 import ActionNode from "./nodes/ActionNode";
 
+// NOTE: node *type strings* must match what the backend's Stream Compiler
+// expects ("dataSource" / "mathOp" / "action" — see streamCompiler.js and
+// graph.controller.js's VALID_NODE_TYPES). The component files keep their
+// original names (SensorNode.jsx, FilterNode.jsx) to avoid churn, but the
+// React Flow `type` key below is what actually gets saved onto each node.
 const nodeTypes = {
-  sensor: SensorNode,
-  filter: FilterNode,
+  dataSource: DataSourceNode,
+  mathOp: MathOpNode,
   action: ActionNode,
 };
 
 const initialNodes = [
   {
     id: "1",
-    type: "sensor",
+    type: "dataSource",
     position: { x: 40, y: 140 },
-    data: { label: "Turbine Sensor", sub: "Data Source · WebSocket" },
+    data: { label: "Turbine 14 — Bay A", sub: "Data Source · Temperature", deviceId: "TUR-014" },
   },
   {
     id: "2",
-    type: "filter",
+    type: "mathOp",
     position: { x: 360, y: 140 },
-    data: { label: "Moving Average", sub: "Filter · window = 10" },
+    data: { label: "Moving Average", sub: "Filter · window = 10", operation: "Moving Average", window: 10 },
   },
   {
     id: "3",
     type: "action",
     position: { x: 680, y: 140 },
-    data: { label: "SMS Alert", sub: "Action · threshold > 80°C" },
+    data: { label: "SMS Alert", sub: "Action · SMS", actionType: "SMS", target: "+15550000000" },
   },
 ];
 
@@ -53,17 +60,32 @@ const initialEdges = [
 let idCounter = 4;
 
 function CanvasInner() {
-    const { token } = useAuth();
+  const { token } = useAuth();
   const wrapperRef = useRef(null);
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
-  const [selected, setSelected] = useState(null);
+  const [selectedId, setSelectedId] = useState(null);
+  const [devices, setDevices] = useState([]);
+  const [graphId, setGraphId] = useState(null); // set once we've saved — reused on redeploy so we don't duplicate graphs
+  const [deployState, setDeployState] = useState("idle"); // idle | deploying | live | error
+
+  const history = useGraphHistory(initialNodes, initialEdges);
+  const selected = nodes.find((n) => n.id === selectedId) || null;
+
+  useEffect(() => {
+    api.getDevices().then(setDevices).catch(() => setDevices([]));
+  }, []);
 
   const onConnect = useCallback(
-    (params) =>
-      setEdges((eds) => addEdge({ ...params, animated: true, className: "glow-edge" }, eds)),
-    [setEdges]
+    (params) => {
+      setEdges((eds) => {
+        const next = addEdge({ ...params, animated: true, className: "glow-edge" }, eds);
+        history.commit(nodes, next);
+        return next;
+      });
+    },
+    [setEdges, nodes, history]
   );
 
   const onDragOver = useCallback((event) => {
@@ -89,30 +111,75 @@ function CanvasInner() {
         id: `${idCounter++}`,
         type,
         position,
-        data: { label: label || "New Node", sub: hint || "" },
+        data: defaultDataFor(type, label, hint),
       };
-      setNodes((nds) => nds.concat(newNode));
+      setNodes((nds) => {
+        const next = nds.concat(newNode);
+        history.commit(next, edges);
+        return next;
+      });
     },
-    [reactFlowInstance, setNodes]
+    [reactFlowInstance, setNodes, edges, history]
   );
+
+  const onNodeDataChange = useCallback(
+    (nodeId, patch) => {
+      setNodes((nds) => {
+        const next = nds.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, ...patch } } : n));
+        history.commit(next, edges);
+        return next;
+      });
+    },
+    [setNodes, edges, history]
+  );
+
+  const applySnapshot = useCallback(
+    (snapshot) => {
+      if (!snapshot) return;
+      setNodes(snapshot.nodes);
+      setEdges(snapshot.edges);
+    },
+    [setNodes, setEdges]
+  );
+
+  const handleUndo = useCallback(() => applySnapshot(history.undo()), [applySnapshot, history]);
+  const handleRedo = useCallback(() => applySnapshot(history.redo()), [applySnapshot, history]);
+
+  useEffect(() => {
+    function onKeyDown(e) {
+      const meta = e.ctrlKey || e.metaKey;
+      if (!meta) return;
+      if (e.key === "z" && !e.shiftKey) {
+        e.preventDefault();
+        handleUndo();
+      } else if (e.key === "y" || (e.key === "z" && e.shiftKey)) {
+        e.preventDefault();
+        handleRedo();
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [handleUndo, handleRedo]);
+
   const handleDeploy = async () => {
-  try {
-    const graph = await api.createGraph(
-      "Turbine Monitoring Pipeline",
-      nodes,
-      edges,
-      token
-    );
+    setDeployState("deploying");
+    try {
+      const { nodes: cleanNodes, edges: cleanEdges } = toJSON(nodes, edges);
+      // Reuse the same saved graph on repeat deploys instead of creating a
+      // new "Turbine Monitoring Pipeline" document every click.
+      const graph = graphId
+        ? await api.updateGraph(graphId, { name: "Turbine Monitoring Pipeline", nodes: cleanNodes, edges: cleanEdges }, token)
+        : await api.createGraph("Turbine Monitoring Pipeline", cleanNodes, cleanEdges, token);
 
-    const graphId = graph._id;
+      if (!graphId) setGraphId(graph._id);
 
-    await api.deployGraph(graphId, token);
-
-    alert("Graph deployed successfully!");
-  } catch (err) {
-    alert(`Deploy failed: ${err.message}`);
-  }
-};
+      await api.deployGraph(graph._id, token);
+      setDeployState("live");
+    } catch (err) {
+      setDeployState("error");
+      alert(`Deploy failed: ${err.message}`);
+    }
+  };
 
   return (
     <div className="canvas-shell">
@@ -121,13 +188,22 @@ function CanvasInner() {
       <div className="canvas-area" ref={wrapperRef}>
         <div className="canvas-toolbar">
           <span className="canvas-toolbar-title">Pipeline Canvas</span>
-          <button
-            type="button"
-            className="canvas-deploy-btn"
-            onClick={handleDeploy}
-          >
-            Deploy Graph
-          </button>
+          <div className="canvas-toolbar-actions">
+            <button type="button" onClick={handleUndo} disabled={!history.canUndo} title="Undo (Ctrl+Z)">
+              ↶ Undo
+            </button>
+            <button type="button" onClick={handleRedo} disabled={!history.canRedo} title="Redo (Ctrl+Y)">
+              ↷ Redo
+            </button>
+            <button
+              type="button"
+              className="canvas-deploy-btn"
+              onClick={handleDeploy}
+              disabled={deployState === "deploying"}
+            >
+              {deployState === "deploying" ? "Deploying…" : graphId ? "Redeploy Graph" : "Deploy Graph"}
+            </button>
+          </div>
         </div>
 
         <ReactFlow
@@ -139,8 +215,8 @@ function CanvasInner() {
           onInit={setReactFlowInstance}
           onDrop={onDrop}
           onDragOver={onDragOver}
-          onNodeClick={(_, node) => setSelected(node)}
-          onPaneClick={() => setSelected(null)}
+          onNodeClick={(_, node) => setSelectedId(node.id)}
+          onPaneClick={() => setSelectedId(null)}
           nodeTypes={nodeTypes}
           fitView
           proOptions={{ hideAttribution: true }}
@@ -152,24 +228,25 @@ function CanvasInner() {
 
         <div className="canvas-hint">
           <span className="canvas-hint-dot" />
-          Live data flowing — wires glow while telemetry passes through
+          {deployState === "live"
+            ? "Live — deployed pipeline is running"
+            : "Live data flowing — wires glow while telemetry passes through"}
         </div>
 
-        {selected && (
-          <div className="canvas-inspector">
-            <div className="canvas-inspector-head">
-              <span className="canvas-inspector-label">Selected Node</span>
-              <button type="button" onClick={() => setSelected(null)}>
-                ✕
-              </button>
-            </div>
-            <h4>{selected.data.label}</h4>
-            <p>{selected.data.sub}</p>
-          </div>
-        )}
+        <Inspector node={selected} devices={devices} onChange={onNodeDataChange} onClose={() => setSelectedId(null)} />
       </div>
     </div>
   );
+}
+
+function defaultDataFor(type, label, hint) {
+  if (type === "dataSource") {
+    return { label: label || "Data Source", sub: hint || "Data Source", deviceId: "" };
+  }
+  if (type === "mathOp") {
+    return { label: label || "Math Operation", sub: hint || "Filter · window = 10", operation: "Moving Average", window: 10 };
+  }
+  return { label: label || "Action Trigger", sub: hint || "Action", actionType: "SMS", target: "" };
 }
 
 function Canvas() {

@@ -1,55 +1,91 @@
-/*import Canvas from "../components/Canvas";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { api } from "../lib/api";
 import "./Dashboard.css";
-import Sidebar from "../components/Sidebar";
+
+function isToday(dateLike) {
+  if (!dateLike) return false;
+  const d = new Date(dateLike);
+  const now = new Date();
+  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+}
 
 function Dashboard() {
-  const { user, logout } = useAuth();
-  const initial = user?.name ? user.name.charAt(0).toUpperCase() : "U";
+  const { token } = useAuth();
+  const [kpis, setKpis] = useState({
+    activePipelines: null,
+    totalPipelines: null,
+    ingestRate: null,
+    alertsToday: null,
+    devicesOnline: null,
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    Promise.allSettled([api.listGraphs(token), api.getTelemetryStats(token), api.listAlerts(token), api.getDevices()]).then(
+      ([graphsRes, statsRes, alertsRes, devicesRes]) => {
+        if (cancelled) return;
+
+        const graphs = graphsRes.status === "fulfilled" ? graphsRes.value : [];
+        const stats = statsRes.status === "fulfilled" ? statsRes.value : null;
+        const alerts = alertsRes.status === "fulfilled" ? alertsRes.value : [];
+        const devices = devicesRes.status === "fulfilled" ? devicesRes.value : [];
+
+        setKpis({
+          activePipelines: graphs.filter((g) => g.status === "running").length,
+          totalPipelines: graphs.length,
+          ingestRate: stats ? stats.totalReadings : null,
+          alertsToday: alerts.filter((a) => isToday(a.createdAt)).length,
+          devicesOnline: devices.length,
+        });
+      }
+    );
+
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
 
   return (
-    <div className="dash-shell">
-      <header className="dash-topbar">
-        <div className="dash-brand">
-          <span className="dash-brand-mark" />
-          NexusFlow
-        </div>
-        <div className="dash-user">
-          <span className="dash-user-name">{user?.name || "Guest"}</span>
-          <span className="dash-user-avatar">{initial}</span>
-          <button type="button" className="dash-logout" onClick={logout}>
-            Logout
-          </button>
-        </div>
-      </header>
+    <div className="dashboard-page">
+      <div className="dashboard-heading">
+        <h1>Dashboard</h1>
+        <p>A live snapshot of your NexusFlow deployment.</p>
+      </div>
 
-    
-        <div className="dash-heading">
-          <h1>Pipeline Canvas</h1>
+      <div className="kpi-grid">
+        <KpiCard label="Active Pipelines" value={kpis.activePipelines} sub={`${kpis.totalPipelines ?? 0} total`} />
+        <KpiCard label="Ingest Rate" value={kpis.ingestRate} sub="readings stored" />
+        <KpiCard label="Alerts Today" value={kpis.alertsToday} sub="fired in the last 24h" />
+        <KpiCard label="Devices Online" value={kpis.devicesOnline} sub="registered sensors" />
+      </div>
+
+      <div className="page-card dashboard-cta">
+        <div>
+          <h3>Build or edit a pipeline</h3>
           <p>Drag sensors, filters and alert nodes onto the canvas to build a live rule pipeline.</p>
         </div>
-        <Canvas />
-      </main>
+        <div className="dashboard-cta-actions">
+          <Link to="/canvas" className="settings-save-btn">
+            Open Canvas
+          </Link>
+          <Link to="/pipelines" className="dashboard-cta-secondary">
+            View all pipelines →
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
 
-export default Dashboard;*/
-import Canvas from "../components/Canvas";
-import "./Dashboard.css";
-
-function Dashboard() {
+function KpiCard({ label, value, sub }) {
   return (
-    <div className="dashboard-page">
-      <div className="dashboard-heading">
-        <h1>Pipeline Canvas</h1>
-        <p>
-          Drag sensors, filters and alert nodes onto the canvas to build a
-          live rule pipeline.
-        </p>
-      </div>
-
-      <Canvas />
+    <div className="kpi-card">
+      <span className="kpi-label">{label}</span>
+      <span className="kpi-value">{value ?? "—"}</span>
+      <span className="kpi-sub">{sub}</span>
     </div>
   );
 }

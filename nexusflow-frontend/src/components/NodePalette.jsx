@@ -1,10 +1,10 @@
 import "./NodePalette.css";
 
 const ITEMS = [
-  { type: "sensor", label: "Turbine Sensor", hint: "Data Source", color: "blue" },
-  { type: "sensor", label: "Data Source", hint: "Generic input", color: "blue" },
-  { type: "filter", label: "Moving Average", hint: "Filter", color: "green" },
-  { type: "filter", label: "Math Operation", hint: "Filter", color: "green" },
+  { type: "dataSource", label: "Turbine Sensor", hint: "Data Source", color: "blue" },
+  { type: "dataSource", label: "Data Source", hint: "Generic input", color: "blue" },
+  { type: "mathOp", label: "Moving Average", hint: "Filter", color: "green" },
+  { type: "mathOp", label: "Math Operation", hint: "Filter", color: "green" },
   { type: "action", label: "SMS Alert", hint: "Action Trigger", color: "red" },
   { type: "action", label: "Webhook Trigger", hint: "Action Trigger", color: "red" },
 ];
