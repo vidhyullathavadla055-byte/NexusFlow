@@ -14,6 +14,7 @@ import authRoutes from "./routes/auth.routes.js";
 import healthRoutes from "./routes/health.routes.js";
 import graphRoutes from "./routes/graph.routes.js";
 import alertRoutes from "./routes/alert.routes.js";
+import activityRoutes from "./routes/activity.routes.js";
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
 import { startAutoSimulator } from "./services/autoSimulator.js";
 
@@ -42,6 +43,9 @@ async function start() {
   // Alerts
   app.use("/api/alerts", alertRoutes);
 
+  // Krishna — Week 3: rule-engine activity log (deploys / rule triggers / errors)
+  app.use("/api/activity", activityRoutes);
+
   // Error handling
   app.use(notFound);
   app.use(errorHandler);
@@ -62,6 +66,7 @@ async function start() {
     console.log(`[server] Auth           GET  http://localhost:${env.port}/api/auth/me`);
     console.log(`[server] Alerts         GET  http://localhost:${env.port}/api/alerts`);
     console.log(`[server] Graphs         GET  http://localhost:${env.port}/api/graphs`);
+    console.log(`[server] Activity       GET  http://localhost:${env.port}/api/activity`);
 
     startAutoSimulator();
   });
