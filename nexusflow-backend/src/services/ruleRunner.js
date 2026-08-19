@@ -1,6 +1,5 @@
 import { compileGraph } from "./streamCompiler.js";
-import { sendSms } from "./alerting/smsService.js";
-import { callWebhook } from "./alerting/webhookService.js";
+import { deliverSms, deliverWebhook } from "./alerting/deliveryService.js";
 import { recordAlert } from "../models/alertModel.js";
 import { broadcast } from "../websocket/wsServer.js";
 
@@ -13,7 +12,15 @@ export function deployGraph(graphId, graph) {
   const compiled = compileGraph(graph); // throws on invalid graph — caller should catch
   const subscriptions = compiled.map(({ node, observable }) =>
     observable.subscribe({
-      next: (value) => handleActionFire(graphId, graph, node, value),
+      // Day 11 — handleActionFire is async; the old code called it here
+      // without handling its rejection, which becomes an unhandled
+      // promise rejection (and can crash the process) if it ever throws.
+      // Route failures through the same error log instead.
+      next: (value) => {
+        handleActionFire(graphId, graph, node, value).catch((err) => {
+          console.error(`[ruleRunner] action handler failed for graph ${graphId}:`, err.message);
+        });
+      },
       error: (err) => console.error(`[ruleRunner] pipeline error on graph ${graphId}:`, err.message),
     })
   );
@@ -49,11 +56,15 @@ async function handleActionFire(graphId, graph, actionNode, value) {
   const summary = `Rule "${graph.name || graphId}" fired — ${label} (${actionType})`;
   console.log(`[ruleRunner] ${summary} — value=${JSON.stringify(value)}`);
 
+  // Day 11 — SMS/Webhook actions now go through deliveryService.js, so a
+  // live rule-fired action gets the same retry-with-backoff and
+  // delivery-history logging that Day 10 built (previously this called
+  // sendSms/callWebhook directly and never retried a transient failure).
   let deliveryResult;
   if (actionType === "SMS") {
-    deliveryResult = await sendSms({ to: target, body: `NexusFlow alert: ${summary}. Value: ${JSON.stringify(value)}` });
+    deliveryResult = await deliverSms({ to: target, body: `NexusFlow alert: ${summary}. Value: ${JSON.stringify(value)}` });
   } else if (actionType === "Webhook") {
-    deliveryResult = await callWebhook({ url: target, payload: { graphId, node: actionNode, value, firedAt: new Date().toISOString() } });
+    deliveryResult = await deliverWebhook({ url: target, payload: { graphId, node: actionNode, value, firedAt: new Date().toISOString() } });
   } else if (actionType === "Email") {
     console.log(`[email:mock] → ${target} :: ${summary}`);
     deliveryResult = { ok: true, provider: "mock" };

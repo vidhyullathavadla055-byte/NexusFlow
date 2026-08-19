@@ -1,6 +1,6 @@
 import { combineLatest } from "rxjs";
-import { filter, map } from "rxjs/operators";
-import { telemetry$ } from "./telemetryBus.js";
+import { map } from "rxjs/operators";
+import { telemetryForDevice } from "./telemetryBus.js";
 import { rollingAverage, threshold, derivative } from "./operators/customOperators.js";
 
 /**
@@ -75,12 +75,9 @@ export function compileGraph(graph) {
 function buildDataSource(node) {
   const { deviceId } = node.data;
   if (!deviceId) throw new Error(`Stream Compiler: Data Source "${node.data?.label}" has no deviceId configured.`);
-  // Only let this node's own device readings through — this is what makes
-  // the shared bus behave like a dedicated per-sensor stream downstream.
-  return telemetry$.pipe(
-    filter((reading) => reading.deviceId === deviceId),
-    map((reading) => reading.value)
-  );
+  // Day 11 — subscribe directly to this device's own routed stream instead
+  // of filtering the global firehose; see telemetryBus.js for why.
+  return telemetryForDevice(deviceId).pipe(map((reading) => reading.value));
 }
 
 function buildMathOp(source$, node) {
