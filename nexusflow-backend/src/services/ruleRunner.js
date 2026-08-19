@@ -2,6 +2,7 @@ import { compileGraph } from "./streamCompiler.js";
 import { sendSms } from "./alerting/smsService.js";
 import { callWebhook } from "./alerting/webhookService.js";
 import { recordAlert } from "../models/alertModel.js";
+import { recordActivity } from "../models/activityLogModel.js";
 import { broadcast } from "../websocket/wsServer.js";
 
 /** graphId -> { subscriptions: Subscription[], deployedAt } */
@@ -14,12 +15,19 @@ export function deployGraph(graphId, graph) {
   const subscriptions = compiled.map(({ node, observable }) =>
     observable.subscribe({
       next: (value) => handleActionFire(graphId, graph, node, value),
-      error: (err) => console.error(`[ruleRunner] pipeline error on graph ${graphId}:`, err.message),
+      error: (err) => handlePipelineError(graphId, graph, err),
     })
   );
 
   active.set(graphId, { subscriptions, deployedAt: new Date(), nodeCount: graph.nodes.length });
   console.log(`[ruleRunner] deployed graph ${graphId} — ${compiled.length} action pipeline(s) live`);
+
+  logActivity({
+    type: "deploy",
+    message: `Deployed "${graph.name || graphId}" — ${compiled.length} action pipeline(s) live`,
+    graphId,
+  });
+
   return { actionCount: compiled.length };
 }
 
@@ -42,6 +50,27 @@ export function listRunning() {
     deployedAt: info.deployedAt,
     nodeCount: info.nodeCount,
   }));
+}
+
+/**
+ * activityLogModel.js already existed with recordActivity()/listActivity(),
+ * but nothing ever called it — this is the wiring point. Failures here
+ * (e.g. DB hiccup) must never take down a live rule pipeline, so this is
+ * deliberately fire-and-forget with its own catch.
+ */
+function logActivity(entry) {
+  recordActivity(entry).catch((err) =>
+    console.error(`[ruleRunner] failed to write activity log:`, err.message)
+  );
+}
+
+function handlePipelineError(graphId, graph, err) {
+  console.error(`[ruleRunner] pipeline error on graph ${graphId}:`, err.message);
+  logActivity({
+    type: "error",
+    message: `Pipeline error on "${graph.name || graphId}": ${err.message}`,
+    graphId,
+  });
 }
 
 async function handleActionFire(graphId, graph, actionNode, value) {
@@ -72,4 +101,12 @@ async function handleActionFire(graphId, graph, actionNode, value) {
   });
 
   broadcast({ type: "alert", payload: alert });
+
+  logActivity({
+    type: "rule_trigger",
+    message: summary,
+    graphId,
+    deviceId: actionNode.data?.deviceId,
+    meta: { actionType, target, delivered: !!deliveryResult.ok },
+  });
 }

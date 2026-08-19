@@ -88,4 +88,7 @@ export const api = {
 
   // Telemetry stats — powers the "Ingest Rate" KPI on the Dashboard.
   getTelemetryStats: (token) => request("/telemetry/stats", { token }),
+
+  // Activity log — deploys / rule triggers / errors, for the Activity page.
+  listActivity: (token) => request("/activity", { token }),
 };
