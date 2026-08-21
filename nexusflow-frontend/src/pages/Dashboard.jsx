@@ -1,7 +1,46 @@
+import { useEffect, useState } from "react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+
 import Canvas from "../components/Canvas";
 import "./Dashboard.css";
 
 function Dashboard() {
+  const [telemetryData, setTelemetryData] = useState([
+    { time: "10:00", temperature: 70 },
+    { time: "10:05", temperature: 74 },
+    { time: "10:10", temperature: 78 },
+    { time: "10:15", temperature: 75 },
+    { time: "10:20", temperature: 82 },
+  ]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTelemetryData((currentData) => {
+        const newValue = Math.floor(70 + Math.random() * 20);
+
+        const newPoint = {
+          time: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          temperature: newValue,
+        };
+
+        return [...currentData.slice(-5), newPoint];
+      });
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="dashboard-page">
 
@@ -71,6 +110,48 @@ function Dashboard() {
         </div>
 
       </div>
+
+      {/* Live Telemetry Chart */}
+
+      <div className="dashboard-chart-section">
+
+        <div className="dashboard-section-heading">
+          <h2>Live Telemetry</h2>
+
+          <p>
+            Real-time temperature monitoring from connected sensors.
+          </p>
+        </div>
+
+        <div className="dashboard-chart">
+
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={telemetryData}>
+
+              <CartesianGrid strokeDasharray="3 3" />
+
+              <XAxis dataKey="time" />
+
+              <YAxis />
+
+              <Tooltip />
+
+              <Line
+                type="monotone"
+                dataKey="temperature"
+                stroke="#2563eb"
+                strokeWidth={3}
+                dot={{ r: 4 }}
+              />
+
+            </LineChart>
+          </ResponsiveContainer>
+
+        </div>
+
+      </div>
+
+      {/* Pipeline Canvas */}
 
       <div className="dashboard-canvas-section">
 
