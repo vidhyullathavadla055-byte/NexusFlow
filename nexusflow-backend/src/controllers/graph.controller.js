@@ -1,5 +1,6 @@
 import { saveGraph, updateGraph, getGraph, listGraphs, deleteGraph } from "../models/graphModel.js";
 import { deployGraph, stopGraph, isRunning } from "../services/ruleRunner.js";
+import { recordActivity } from "../models/activityLogModel.js";
 import { DEVICES } from "../data/deviceRegistry.js";
 
 const VALID_NODE_TYPES = new Set(["dataSource", "mathOp", "action"]);
@@ -235,8 +236,32 @@ export async function update(req, res, next) {
       }
     }
 
-    const graph = await updateGraph(req.params.id, body);
-    if (isRunning(req.params.id)) deployGraph(req.params.id, graph); // hot-reload a live pipeline
+    let graph = await updateGraph(req.params.id, body);
+
+    // Day-4/5 fix: this used to call deployGraph() unguarded. deployGraph()
+    // stops the OLD (working) subscriptions before compiling the new ones —
+    // so if the new nodes/edges compile-fail (e.g. a Math Op referencing an
+    // input that got disconnected), the pipeline went silently dark while
+    // the DB record still said status: "running". Editing a live pipeline
+    // could kill it with no visible error anywhere.
+    if (isRunning(req.params.id)) {
+      try {
+        deployGraph(req.params.id, graph);
+      } catch (err) {
+        // Redeploy failed — the pipeline really is stopped now (deployGraph
+        // already tore down the old subscriptions), so make the DB agree
+        // with reality instead of lying about "running".
+        graph = await updateGraph(req.params.id, { status: "stopped" });
+        const reason = err.message?.startsWith("Stream Compiler") ? err.message : "Pipeline stopped: " + err.message;
+        recordActivity({
+          type: "error",
+          message: `Live edit broke "${graph.name || req.params.id}" — pipeline stopped: ${reason}`,
+          graphId: req.params.id,
+        }).catch((e) => console.error("[graph.controller] failed to write activity log:", e.message));
+        return res.status(200).json({ ...graph, deployWarning: reason });
+      }
+    }
+
     res.json(graph);
   } catch (err) {
     next(err);
