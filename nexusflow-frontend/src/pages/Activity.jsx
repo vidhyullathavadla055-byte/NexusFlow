@@ -1,4 +1,5 @@
-import "./Dashboard.css";
+import { useState } from "react";
+import "./Alerts.css";
 
 const STATUS_CLASS = {
   Running: "activity-status--running",
