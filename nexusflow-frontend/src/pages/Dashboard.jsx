@@ -13,26 +13,29 @@ import Canvas from "../components/Canvas";
 import "./Dashboard.css";
 
 function Dashboard() {
+  const [selectedMetric, setSelectedMetric] = useState("temperature");
   const [telemetryData, setTelemetryData] = useState([
-    { time: "10:00", temperature: 70 },
-    { time: "10:05", temperature: 74 },
-    { time: "10:10", temperature: 78 },
-    { time: "10:15", temperature: 75 },
-    { time: "10:20", temperature: 82 },
-  ]);
+  { time: "10:00", temperature: 70, pressure: 40 },
+  { time: "10:05", temperature: 74, pressure: 44 },
+  { time: "10:10", temperature: 78, pressure: 42 },
+  { time: "10:15", temperature: 75, pressure: 48 },
+  { time: "10:20", temperature: 82, pressure: 46 },
+]);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setTelemetryData((currentData) => {
-        const newValue = Math.floor(70 + Math.random() * 20);
+        const newTemperature = Math.floor(70 + Math.random() * 20);
+const newPressure = Math.floor(40 + Math.random() * 15);
 
-        const newPoint = {
-          time: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          temperature: newValue,
-        };
+const newPoint = {
+  time: new Date().toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  }),
+  temperature: newTemperature,
+  pressure: newPressure,
+};
 
         return [...currentData.slice(-5), newPoint];
       });
@@ -115,13 +118,24 @@ function Dashboard() {
 
       <div className="dashboard-chart-section">
 
-        <div className="dashboard-section-heading">
-          <h2>Live Telemetry</h2>
+       <div className="dashboard-section-heading">
 
-          <p>
-            Real-time temperature monitoring from connected sensors.
-          </p>
-        </div>
+  <h2>Live Telemetry</h2>
+
+  <p>
+    Real-time monitoring from connected sensors.
+  </p>
+
+  <select
+    value={selectedMetric}
+    onChange={(e) => setSelectedMetric(e.target.value)}
+    className="telemetry-select"
+  >
+    <option value="temperature">Temperature</option>
+    <option value="pressure">Pressure</option>
+  </select>
+
+</div>
 
         <div className="dashboard-chart">
 
@@ -137,13 +151,12 @@ function Dashboard() {
               <Tooltip />
 
               <Line
-                type="monotone"
-                dataKey="temperature"
-                stroke="#2563eb"
-                strokeWidth={3}
-                dot={{ r: 4 }}
-              />
-
+  type="monotone"
+  dataKey={selectedMetric}
+  stroke="#2563eb"
+  strokeWidth={3}
+  dot={{ r: 4 }}
+/>
             </LineChart>
           </ResponsiveContainer>
 
