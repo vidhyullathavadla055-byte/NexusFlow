@@ -24,6 +24,8 @@ const initialAlerts = [
 
 function Alerts() {
   const [alerts, setAlerts] = useState(initialAlerts);
+    const [searchTerm, setSearchTerm] = useState("");
+  const [severityFilter, setSeverityFilter] = useState("all");
 
   const resolveAlert = (id) => {
     setAlerts((currentAlerts) =>
@@ -46,7 +48,17 @@ function Alerts() {
   const lowCount = alerts.filter(
     (alert) => alert.severity === "low"
   ).length;
+      const filteredAlerts = alerts.filter((alert) => {
+    const matchesSearch =
+      alert.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      alert.device.toLowerCase().includes(searchTerm.toLowerCase());
 
+    const matchesSeverity =
+      severityFilter === "all" ||
+      alert.severity === severityFilter;
+
+    return matchesSearch && matchesSeverity;
+  });
   return (
     <div className="page-shell">
       <div className="page-heading">
@@ -76,7 +88,28 @@ function Alerts() {
           <strong>{lowCount}</strong>
         </div>
       </div>
+              {/* Search and Filter */}
+      <div className="alerts-controls">
+        <input
+          type="text"
+          placeholder="Search alerts..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="alerts-search"
+        />
 
+        <select
+          value={severityFilter}
+          onChange={(e) => setSeverityFilter(e.target.value)}
+          className="alerts-filter"
+        >
+          <option value="all">All Severities</option>
+          <option value="critical">Critical</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
       {/* Alert List */}
       <div className="page-card">
         <div className="alerts-list-header">
@@ -84,14 +117,14 @@ function Alerts() {
           <span>{alerts.length} alerts</span>
         </div>
 
-        {alerts.length === 0 ? (
+       {filteredAlerts.length === 0 ? (
           <div className="no-alerts">
-            <h3>No active alerts</h3>
-            <p>All alerts have been resolved.</p>
+            <h3>No matching alerts</h3>
+<p>Try changing your search or severity filter.</p>
           </div>
         ) : (
           <ul className="alerts-list">
-            {alerts.map((alert) => (
+           {filteredAlerts.map((alert) => (
               <li
                 key={alert.id}
                 className={`alerts-item alerts-item--${alert.severity}`}

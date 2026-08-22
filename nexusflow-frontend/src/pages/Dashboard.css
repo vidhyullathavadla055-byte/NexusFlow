@@ -424,3 +424,37 @@
   height: 300px;
   margin-top: 20px;
 }
+/* Alerts Search and Filter */
+
+.alerts-controls {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.alerts-search {
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+}
+
+.alerts-search:focus {
+  border-color: #2563eb;
+}
+
+.alerts-filter {
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+}
+
+.alerts-filter:focus {
+  border-color: #2563eb;
+}
