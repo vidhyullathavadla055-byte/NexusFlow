@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./Dashboard.css";
 
 const initialAlerts = [
@@ -23,9 +23,17 @@ const initialAlerts = [
 ];
 
 function Alerts() {
-  const [alerts, setAlerts] = useState(initialAlerts);
+  const [alerts, setAlerts] = useState(() => {
+  const savedAlerts = localStorage.getItem("nexusflow_alerts");
+
+  return savedAlerts ? JSON.parse(savedAlerts) : initialAlerts;
+});
     const [searchTerm, setSearchTerm] = useState("");
   const [severityFilter, setSeverityFilter] = useState("all");
+
+   useEffect(() => {
+    localStorage.setItem("nexusflow_alerts", JSON.stringify(alerts));
+  }, [alerts]);
 
   const resolveAlert = (id) => {
     setAlerts((currentAlerts) =>
