@@ -23,12 +23,12 @@ export function initWebSocket(httpServer) {
             console.log(`[ws] client disconnected — ${wss.clients.size} total`),
         );
 
-        // Day-3 fix: a WebSocket EventEmitter that gets an "error" event with
-        // no listener throws — and an *unhandled* throw here crashes the
-        // whole Node process, taking down every deployed rule pipeline for
-        // every connected user, not just this one flaky client (e.g. a
-        // mobile tab losing signal mid-connection). Handling it here just
-        // logs and lets "close" do the normal cleanup.
+        // A socket that emits "error" with no listener attached throws, and
+        // an unhandled throw here crashes the whole Node process — taking
+        // down every deployed rule pipeline for every connected user, not
+        // just this one flaky client (e.g. a mobile tab losing signal
+        // mid-connection). Handling it here just logs and lets "close" do
+        // the normal cleanup.
         socket.on("error", (err) =>
             console.error(`[ws] socket error, dropping this client:`, err.message),
         );
@@ -60,14 +60,18 @@ function statusFor(value, device) {
     return "normal";
 }
 
+export function getClientCount() {
+    return wss ? wss.clients.size : 0;
+}
+
 export function broadcast(message) {
     if (!wss) return;
     const data = JSON.stringify(message);
     wss.clients.forEach((client) => {
         if (client.readyState !== client.OPEN) return;
-        // Day-3 fix: send() can still throw even when readyState is OPEN
-        // (e.g. socket half-closed a moment ago). One bad client shouldn't
-        // stop this loop from reaching everyone else.
+        // send() can still throw even when readyState is OPEN (e.g. socket
+        // half-closed a moment ago). One bad client shouldn't stop this
+        // loop from reaching everyone else.
         try {
             client.send(data);
         } catch (err) {

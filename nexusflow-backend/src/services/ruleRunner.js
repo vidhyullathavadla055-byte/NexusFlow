@@ -77,10 +77,10 @@ async function handleActionFire(graphId, graph, actionNode, value) {
   const summary = `Rule "${graph.name || graphId}" fired — ${label} (${actionType})`;
   console.log(`[ruleRunner] ${summary} — value=${JSON.stringify(value)}`);
 
-  // Day 11 — SMS/Webhook actions now go through deliveryService.js, so a
-  // live rule-fired action gets the same retry-with-backoff and
-  // delivery-history logging that Day 10 built (previously this called
-  // sendSms/callWebhook directly and never retried a transient failure).
+  // SMS/Webhook actions go through deliveryService.js, so a live
+  // rule-fired action gets the same retry-with-backoff and delivery-history
+  // logging as everywhere else (previously this called sendSms/callWebhook
+  // directly and never retried a transient failure).
   let deliveryResult;
   if (actionType === "SMS") {
     deliveryResult = await deliverSms({ to: target, body: `NexusFlow alert: ${summary}. Value: ${JSON.stringify(value)}` });

@@ -16,6 +16,7 @@ import graphRoutes from "./routes/graph.routes.js";
 import alertRoutes from "./routes/alert.routes.js";
 import activityRoutes from "./routes/activity.routes.js";
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
+import { getHealth } from "./controllers/health.controller.js";
 import { startAutoSimulator } from "./services/autoSimulator.js";
 
 async function start() {
@@ -26,24 +27,20 @@ async function start() {
   app.use(express.json());
   app.use(morgan("dev"));
 
-  app.get("/health", (req, res) => res.json({ ok: true, week: 1 }));
+  app.get("/health", getHealth); // root alias, common convention for uptime probes/load balancers
 
-  // Mohan — Week 1 scope
   app.use("/api/ingest", ingestRoutes);
   app.use("/api/telemetry", telemetryRoutes);
   app.use("/api/devices", deviceRoutes);
 
-  // Krishna — Auth & Health
   app.use("/api/auth", authRoutes);
   app.use("/api/health", healthRoutes);
 
-  // Akshaya — Graphs
   app.use("/api/graphs", graphRoutes);
 
-  // Alerts
   app.use("/api/alerts", alertRoutes);
 
-  // Krishna — Week 3: rule-engine activity log (deploys / rule triggers / errors)
+  // Rule-engine activity log (deploys / rule triggers / errors)
   app.use("/api/activity", activityRoutes);
 
   // Error handling
