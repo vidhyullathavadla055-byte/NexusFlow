@@ -9,7 +9,9 @@ export async function getHistory(req, res, next) {
     res.json({ deviceId, count: rows.length, readings: rows });
   } catch (err) {
     next(err);
-  
+  }
+}
+
 export async function getRollup(req, res, next) {
   try {
     const { deviceId } = req.params;
