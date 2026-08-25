@@ -82,6 +82,7 @@ const initialEdges = [
 
 function CanvasInner() {
   const { token } = useAuth();
+  
 
   const wrapperRef = useRef(null);
 
@@ -242,19 +243,25 @@ function CanvasInner() {
           </span>
 
           <div className="canvas-toolbar-actions">
-            
+  <button
+    type="button"
+    className="canvas-save-btn"
+    onClick={() => {
+      console.log("SAVE BUTTON CLICKED");
+      saveGraphToLocalStorage();
+    }}
+  >
+    Save Pipeline
+  </button>
 
-            <button
-  type="button"
-  className="canvas-save-btn"
-  onClick={() => {
-    console.log("SAVE BUTTON CLICKED");
-    saveGraphToLocalStorage();
-  }}
->
-  Save Pipeline
-</button>
-          </div>
+  <button
+    type="button"
+    className="canvas-save-btn"
+    onClick={handleDeploy}
+  >
+    Deploy Pipeline
+  </button>
+</div>
         </div>
 
         <ReactFlow
