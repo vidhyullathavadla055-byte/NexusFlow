@@ -12,7 +12,7 @@ const subject = new Subject();
 export const telemetry$ = subject.asObservable().pipe(share());
 
 /**
- * Day 11 — performance pass.
+ * Per-device routing — performance pass.
  *
  * Compiled rule graphs used to subscribe to the global firehose and
  * `filter()` out everything except their own device. That means every

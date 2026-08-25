@@ -75,8 +75,8 @@ export function compileGraph(graph) {
 function buildDataSource(node) {
   const { deviceId } = node.data;
   if (!deviceId) throw new Error(`Stream Compiler: Data Source "${node.data?.label}" has no deviceId configured.`);
-  // Day 11 — subscribe directly to this device's own routed stream instead
-  // of filtering the global firehose; see telemetryBus.js for why.
+  // Subscribes directly to this device's own routed stream instead of
+  // filtering the global firehose; see telemetryBus.js for why.
   return telemetryForDevice(deviceId).pipe(map((reading) => reading.value));
 }
 

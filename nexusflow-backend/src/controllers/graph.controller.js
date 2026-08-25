@@ -1,5 +1,6 @@
 import { saveGraph, updateGraph, getGraph, listGraphs, deleteGraph } from "../models/graphModel.js";
 import { deployGraph, stopGraph, isRunning } from "../services/ruleRunner.js";
+import { recordActivity } from "../models/activityLogModel.js";
 import { DEVICES } from "../data/deviceRegistry.js";
 
 const VALID_NODE_TYPES = new Set(["dataSource", "mathOp", "action"]);
@@ -85,9 +86,9 @@ function normalizeNodes(nodes) {
 function validateGraphShape({ nodes, edges }) {
   const problems = [];
 
-  // Day-4 addition: an empty pipeline is never deployable — catch it here
-  // instead of letting it fail later inside the Stream Compiler with a
-  // confusing error.
+  // An empty pipeline is never deployable — catch it here instead of
+  // letting it fail later inside the Stream Compiler with a confusing
+  // error.
   if (nodes.length === 0) {
     problems.push("Graph has no nodes — add at least a Data Source and an Action node.");
     return problems;
@@ -95,9 +96,9 @@ function validateGraphShape({ nodes, edges }) {
 
   const nodeIds = new Set(nodes.map((n) => n.id));
 
-  // Day-4 addition: duplicate node ids silently corrupt the adjacency map
-  // built below (later nodes overwrite earlier ones), which used to let
-  // broken graphs slip past validation. Catch it explicitly instead.
+  // Duplicate node ids silently corrupt the adjacency map built below
+  // (later nodes overwrite earlier ones), which used to let broken graphs
+  // slip past validation. Catch it explicitly instead.
   const seenIds = new Set();
   for (const node of nodes) {
     if (node.id && seenIds.has(node.id)) {
@@ -127,8 +128,8 @@ function validateGraphShape({ nodes, edges }) {
     connected.add(edge.target);
   }
 
-  // Day-4 addition: flag nodes that aren't wired into the pipeline at all.
-  // A dataSource/mathOp/action dropped on the canvas but never connected
+  // Flag nodes that aren't wired into the pipeline at all. A
+  // dataSource/mathOp/action dropped on the canvas but never connected
   // would otherwise save "successfully" and just silently do nothing at
   // deploy time. Only fires when there's more than one node, since a
   // single-node graph has nothing to connect to yet.
@@ -235,8 +236,32 @@ export async function update(req, res, next) {
       }
     }
 
-    const graph = await updateGraph(req.params.id, body);
-    if (isRunning(req.params.id)) deployGraph(req.params.id, graph); // hot-reload a live pipeline
+    let graph = await updateGraph(req.params.id, body);
+
+    // This used to call deployGraph() unguarded. deployGraph()
+    // stops the OLD (working) subscriptions before compiling the new ones —
+    // so if the new nodes/edges compile-fail (e.g. a Math Op referencing an
+    // input that got disconnected), the pipeline went silently dark while
+    // the DB record still said status: "running". Editing a live pipeline
+    // could kill it with no visible error anywhere.
+    if (isRunning(req.params.id)) {
+      try {
+        deployGraph(req.params.id, graph);
+      } catch (err) {
+        // Redeploy failed — the pipeline really is stopped now (deployGraph
+        // already tore down the old subscriptions), so make the DB agree
+        // with reality instead of lying about "running".
+        graph = await updateGraph(req.params.id, { status: "stopped" });
+        const reason = err.message?.startsWith("Stream Compiler") ? err.message : "Pipeline stopped: " + err.message;
+        recordActivity({
+          type: "error",
+          message: `Live edit broke "${graph.name || req.params.id}" — pipeline stopped: ${reason}`,
+          graphId: req.params.id,
+        }).catch((e) => console.error("[graph.controller] failed to write activity log:", e.message));
+        return res.status(200).json({ ...graph, deployWarning: reason });
+      }
+    }
+
     res.json(graph);
   } catch (err) {
     next(err);
