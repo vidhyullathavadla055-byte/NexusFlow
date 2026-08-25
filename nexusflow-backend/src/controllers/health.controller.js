@@ -1,9 +1,7 @@
 import { getDb } from "../config/db.js";
 import { getClientCount } from "../websocket/wsServer.js";
 
-// Pings MongoDB and reports live WebSocket client count so this endpoint
-// actually reflects whether the service can do its job, not just that the
-// Express process is up.
+
 export async function getHealth(req, res) {
   let dbOk = false;
   try {
