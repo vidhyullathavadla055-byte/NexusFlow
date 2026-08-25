@@ -20,9 +20,7 @@ const BATCHES_PER_SEC = Math.max(1, Math.round(RATE / BATCH_SIZE));
 const INTERVAL_MS = 1000 / BATCHES_PER_SEC;
 const REPORT_PATH = args.report || null;
 
-// Reuse TCP connections across requests instead of a new handshake per
-// batch — at 20+ batches/sec this is the difference between hitting the
-// target rate and falling behind on connection setup alone.
+
 const client = axios.create({
   httpAgent: new http.Agent({ keepAlive: true, maxSockets: 64 }),
   httpsAgent: new https.Agent({ keepAlive: true, maxSockets: 64 }),
@@ -82,8 +80,7 @@ async function run() {
   const sendTimer = setInterval(async () => {
     if (inFlight > 0) {
       backpressureWarnings++;
-      // still let it fire — we want to see how badly we're falling behind,
-      // not silently mask it — but it's now visible in the final report.
+      
     }
     const readings = makeBatch();
     const reqStart = Date.now();
