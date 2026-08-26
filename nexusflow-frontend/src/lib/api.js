@@ -85,6 +85,7 @@ export const api = {
 
   // Alerts — powers the "Alerts Today" KPI on the Dashboard.
   listAlerts: (token) => request("/alerts", { token }),
+  resolveAlert: (id, token) => request(`/alerts/${id}/resolve`, { method: "PATCH", token }),
 
   // Telemetry stats — powers the "Ingest Rate" KPI on the Dashboard.
   getTelemetryStats: (token) => request("/telemetry/stats", { token }),

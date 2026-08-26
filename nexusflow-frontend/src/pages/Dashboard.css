@@ -291,6 +291,38 @@
   color: #64748b;
 }
 
+.alerts-item--resolved {
+  opacity: 0.6;
+}
+
+.alerts-resolve-btn {
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #fff;
+  color: #334155;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 5px 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.alerts-resolve-btn:hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+.alerts-resolve-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.alerts-resolved-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: #16a34a;
+  flex-shrink: 0;
+}
+
 /* ── Settings ── */
 .settings-save-btn {
   padding: 10px 22px;
