@@ -92,4 +92,10 @@ export const api = {
 
   // Activity log — deploys / rule triggers / errors, for the Activity page.
   listActivity: (token) => request("/activity", { token }),
+
+  // Settings — profile, password, notification-channel toggles.
+  getSettings: (token) => request("/settings", { token }),
+  updateProfile: (body, token) => request("/settings/profile", { method: "PATCH", body, token }),
+  changePassword: (body, token) => request("/settings/password", { method: "PATCH", body, token }),
+  updateNotifications: (body, token) => request("/settings/notifications", { method: "PATCH", body, token }),
 };

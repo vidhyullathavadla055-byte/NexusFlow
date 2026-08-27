@@ -53,8 +53,14 @@ export function AuthProvider({ children }) {
     localStorage.removeItem(STORAGE_KEY);
   }
 
+  /** Refreshes the cached user (e.g. after a Settings save) without a full re-login. */
+  function updateUser(nextUser) {
+    setUser(nextUser);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ user: nextUser, token }));
+  }
+
   return (
-    <AuthContext.Provider value={{ user, token, ready, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, token, ready, login, signup, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );
