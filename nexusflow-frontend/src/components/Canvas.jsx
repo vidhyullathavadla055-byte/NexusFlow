@@ -78,11 +78,8 @@ const initialEdges = [
   },
 ];
 
-
-
 function CanvasInner() {
   const { token } = useAuth();
-  
 
   const wrapperRef = useRef(null);
 
@@ -96,6 +93,73 @@ function CanvasInner() {
     useState(null);
 
   const [selected, setSelected] = useState(null);
+  const [telemetry, setTelemetry] = useState(null);
+const [telemetryLoading, setTelemetryLoading] = useState(false);
+
+    const updateSelectedNode = (field, value) => {
+    if (!selected) {
+      return;
+    }
+
+    setNodes((nds) =>
+      nds.map((node) =>
+        node.id === selected.id
+          ? {
+              ...node,
+              data: {
+                ...node.data,
+                [field]: value,
+              },
+            }
+          : node
+      )
+    );
+
+    setSelected((prev) => ({
+      ...prev,
+      data: {
+        ...prev.data,
+        [field]: value,
+      },
+    }));
+  };
+  useEffect(() => {
+  if (!selected || selected.type !== "sensor") {
+    setTelemetry(null);
+    return;
+  }
+
+  const fetchTelemetry = async () => {
+    try {
+      setTelemetryLoading(true);
+
+      const response = await fetch(
+        "http://localhost:4000/api/telemetry/stats"
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch telemetry");
+      }
+
+      const data = await response.json();
+
+      console.log("Sensor telemetry:", data);
+
+      setTelemetry(data);
+    } catch (error) {
+      console.error(
+        "Failed to load sensor telemetry:",
+        error
+      );
+
+      setTelemetry(null);
+    } finally {
+      setTelemetryLoading(false);
+    }
+  };
+
+  fetchTelemetry();
+}, [selected]);
 
   // Restore saved graph when Canvas opens
   useEffect(() => {
@@ -243,25 +307,25 @@ function CanvasInner() {
           </span>
 
           <div className="canvas-toolbar-actions">
-  <button
-    type="button"
-    className="canvas-save-btn"
-    onClick={() => {
-      console.log("SAVE BUTTON CLICKED");
-      saveGraphToLocalStorage();
-    }}
-  >
-    Save Pipeline
-  </button>
+            <button
+              type="button"
+              className="canvas-save-btn"
+              onClick={() => {
+                console.log("SAVE BUTTON CLICKED");
+                saveGraphToLocalStorage();
+              }}
+            >
+              Save Pipeline
+            </button>
 
-  <button
-    type="button"
-    className="canvas-save-btn"
-    onClick={handleDeploy}
-  >
-    Deploy Pipeline
-  </button>
-</div>
+            <button
+              type="button"
+              className="canvas-save-btn"
+              onClick={handleDeploy}
+            >
+              Deploy Pipeline
+            </button>
+          </div>
         </div>
 
         <ReactFlow
@@ -315,21 +379,120 @@ function CanvasInner() {
 
               <button
                 type="button"
-                onClick={() =>
-                  setSelected(null)
-                }
+                onClick={() => setSelected(null)}
               >
                 ✕
               </button>
             </div>
 
-            <h4>
-              {selected.data.label}
-            </h4>
+            <label>Node Label</label>
 
-            <p>
-              {selected.data.sub}
-            </p>
+<input
+  type="text"
+  value={selected.data.label || ""}
+  onChange={(e) =>
+    updateSelectedNode("label", e.target.value)
+  }
+/>
+
+            <span className="canvas-inspector-type">
+              Type: {selected.type}
+            </span>
+
+            <label>Node Description</label>
+
+<input
+  type="text"
+  value={selected.data.sub || ""}
+  onChange={(e) =>
+    updateSelectedNode("sub", e.target.value)
+  }
+/>
+
+            <div className="canvas-inspector-details">
+              {selected.type === "sensor" && (
+  <>
+    <div>
+      <strong>Source:</strong> WebSocket
+    </div>
+
+    <div>
+      <strong>Data:</strong> Turbine Telemetry
+    </div>
+
+    <div style={{ marginTop: "10px" }}>
+      <strong>Latest Telemetry</strong>
+    </div>
+
+    {telemetryLoading && (
+      <div>Loading telemetry...</div>
+    )}
+
+    {!telemetryLoading && telemetry && (
+      <>
+        {telemetry.temperature !== undefined && (
+          <div>
+            <strong>Temperature:</strong>{" "}
+            {telemetry.temperature} °C
+          </div>
+        )}
+
+        {telemetry.pressure !== undefined && (
+          <div>
+            <strong>Pressure:</strong>{" "}
+            {telemetry.pressure}
+          </div>
+        )}
+
+        {telemetry.rpm !== undefined && (
+          <div>
+            <strong>RPM:</strong>{" "}
+            {telemetry.rpm}
+          </div>
+        )}
+      </>
+    )}
+
+    {!telemetryLoading && !telemetry && (
+      <div>
+        No telemetry data available
+      </div>
+    )}
+  </>
+)}
+
+              {selected.type === "filter" && (
+                <>
+                  <div>
+                    <strong>Filter:</strong> Moving Average
+                  </div>
+
+                  <div>
+                    <strong>Window:</strong> 10
+                  </div>
+                </>
+              )}
+
+              {selected.type === "action" && (
+                <>
+                  <div>
+                    <strong>Action:</strong> SMS Alert
+                  </div>
+
+                  <div>
+                    <strong>Threshold:</strong> &gt; 80°C
+                  </div>
+                </>
+              )}
+
+              {selected.type === "webhook" && (
+                <>
+                  <div>
+                    <strong>Action:</strong> Webhook
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         )}
       </div>

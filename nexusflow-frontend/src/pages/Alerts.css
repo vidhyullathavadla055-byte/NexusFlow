@@ -229,3 +229,17 @@
   margin-bottom: 6px;
   color: #444;
 }
+.reset-alerts-btn {
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.reset-alerts-btn:hover {
+  background: #cbd5e1;
+}

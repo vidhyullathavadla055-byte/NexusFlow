@@ -1,7 +1,16 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "./Dashboard.css";
 
+  
+
 const initialAlerts = [
+
+    {
+    id: 0,
+    message: "Critical Temperature",
+    device: "Turbine Sensor",
+    severity: "critical",
+  },
   {
     id: 1,
     message: "High Temperature",
@@ -24,22 +33,29 @@ const initialAlerts = [
 
 function Alerts() {
   const [alerts, setAlerts] = useState(() => {
-  const savedAlerts = localStorage.getItem("nexusflow_alerts");
+  const savedAlerts = localStorage.getItem("nexusflowAlerts");
 
-  return savedAlerts ? JSON.parse(savedAlerts) : initialAlerts;
+  return savedAlerts
+    ? JSON.parse(savedAlerts)
+    : initialAlerts;
 });
-    const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [severityFilter, setSeverityFilter] = useState("all");
 
-   useEffect(() => {
-    localStorage.setItem("nexusflow_alerts", JSON.stringify(alerts));
-  }, [alerts]);
-
   const resolveAlert = (id) => {
-    setAlerts((currentAlerts) =>
-      currentAlerts.filter((alert) => alert.id !== id)
+  setAlerts((currentAlerts) => {
+    const updatedAlerts = currentAlerts.filter(
+      (alert) => alert.id !== id
     );
-  };
+
+    localStorage.setItem(
+      "nexusflowAlerts",
+      JSON.stringify(updatedAlerts)
+    );
+
+    return updatedAlerts;
+  });
+};
 
   const criticalCount = alerts.filter(
     (alert) => alert.severity === "critical"
@@ -56,10 +72,14 @@ function Alerts() {
   const lowCount = alerts.filter(
     (alert) => alert.severity === "low"
   ).length;
-      const filteredAlerts = alerts.filter((alert) => {
+
+  const filteredAlerts = alerts.filter((alert) => {
+    const search = searchTerm.trim().toLowerCase();
+
     const matchesSearch =
-      alert.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      alert.device.toLowerCase().includes(searchTerm.toLowerCase());
+      search === "" ||
+      alert.message.toLowerCase().includes(search) ||
+      alert.device.toLowerCase().includes(search);
 
     const matchesSeverity =
       severityFilter === "all" ||
@@ -67,6 +87,7 @@ function Alerts() {
 
     return matchesSearch && matchesSeverity;
   });
+
   return (
     <div className="page-shell">
       <div className="page-heading">
@@ -74,7 +95,6 @@ function Alerts() {
         <p>Monitor all active alerts.</p>
       </div>
 
-      {/* Severity Summary */}
       <div className="alerts-summary">
         <div className="summary-chip summary-chip--critical">
           <span>Critical</span>
@@ -96,7 +116,6 @@ function Alerts() {
           <strong>{lowCount}</strong>
         </div>
       </div>
-              {/* Search and Filter */}
       <div className="alerts-controls">
         <input
           type="text"
@@ -118,21 +137,21 @@ function Alerts() {
           <option value="low">Low</option>
         </select>
       </div>
-      {/* Alert List */}
+
       <div className="page-card">
         <div className="alerts-list-header">
           <h2>Active Alerts</h2>
-          <span>{alerts.length} alerts</span>
+          <span>{filteredAlerts.length} alerts</span>
         </div>
 
-       {filteredAlerts.length === 0 ? (
+        {filteredAlerts.length === 0 ? (
           <div className="no-alerts">
             <h3>No matching alerts</h3>
-<p>Try changing your search or severity filter.</p>
+            <p>Try changing your search or severity filter.</p>
           </div>
         ) : (
           <ul className="alerts-list">
-           {filteredAlerts.map((alert) => (
+            {filteredAlerts.map((alert) => (
               <li
                 key={alert.id}
                 className={`alerts-item alerts-item--${alert.severity}`}
@@ -147,7 +166,9 @@ function Alerts() {
                   {alert.device}
                 </span>
 
-                <span className={`severity-badge severity-${alert.severity}`}>
+                <span
+                  className={`severity-badge severity-${alert.severity}`}
+                >
                   {alert.severity}
                 </span>
 
