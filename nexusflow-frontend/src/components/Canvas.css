@@ -71,6 +71,17 @@
   pointer-events: auto;
 }
 
+.canvas-toolbar-actions select.canvas-sample-select {
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 8px;
+  cursor: pointer;
+}
+
 .canvas-toolbar-actions button:not(.canvas-deploy-btn) {
   border: 1px solid #e2e8f0;
   border-radius: 7px;

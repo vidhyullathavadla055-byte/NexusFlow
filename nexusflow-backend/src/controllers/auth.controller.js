@@ -1,12 +1,7 @@
-import jwt from "jsonwebtoken";
-import { env } from "../config/env.js";
 import { createUser, findUserByEmail, findUserById, verifyPassword, toPublicUser } from "../models/userModel.js";
+import { signToken } from "../utils/jwt.js";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function signToken(user) {
-  return jwt.sign({ sub: String(user._id), role: user.role }, env.jwtSecret, { expiresIn: env.jwtExpiresIn });
-}
 
 export async function signup(req, res, next) {
   try {

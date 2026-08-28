@@ -1,5 +1,4 @@
-import jwt from "jsonwebtoken";
-import { env } from "../config/env.js";
+import { verifyToken } from "../utils/jwt.js";
 
 export function requireAuth(req, res, next) {
   const header = req.headers.authorization || "";
@@ -7,7 +6,7 @@ export function requireAuth(req, res, next) {
   if (!token) return res.status(401).json({ error: "Missing or invalid authorization header." });
 
   try {
-    const payload = jwt.verify(token, env.jwtSecret);
+    const payload = verifyToken(token);
     req.userId = payload.sub;
     req.userRole = payload.role;
     next();

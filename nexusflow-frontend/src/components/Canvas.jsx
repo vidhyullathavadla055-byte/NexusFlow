@@ -19,6 +19,7 @@ import Inspector from "./Inspector";
 import DataSourceNode from "./nodes/SensorNode";
 import MathOpNode from "./nodes/FilterNode";
 import ActionNode from "./nodes/ActionNode";
+import { SAMPLE_GRAPHS, getDefaultGraph } from "../data/mockGraph";
 
 // NOTE: node *type strings* must match what the backend's Stream Compiler
 // expects ("dataSource" / "mathOp" / "action" — see streamCompiler.js and
@@ -31,31 +32,9 @@ const nodeTypes = {
   action: ActionNode,
 };
 
-const initialNodes = [
-  {
-    id: "1",
-    type: "dataSource",
-    position: { x: 40, y: 140 },
-    data: { label: "Turbine 14 — Bay A", sub: "Data Source · Temperature", deviceId: "TUR-014" },
-  },
-  {
-    id: "2",
-    type: "mathOp",
-    position: { x: 360, y: 140 },
-    data: { label: "Moving Average", sub: "Filter · window = 10", operation: "Moving Average", window: 10 },
-  },
-  {
-    id: "3",
-    type: "action",
-    position: { x: 680, y: 140 },
-    data: { label: "SMS Alert", sub: "Action · SMS", actionType: "SMS", target: "+15550000000" },
-  },
-];
-
-const initialEdges = [
-  { id: "e1-2", source: "1", target: "2", animated: true, className: "glow-edge" },
-  { id: "e2-3", source: "2", target: "3", animated: true, className: "glow-edge" },
-];
+const defaultGraph = getDefaultGraph();
+const initialNodes = defaultGraph.nodes;
+const initialEdges = defaultGraph.edges.map((e) => ({ ...e, animated: true, className: "glow-edge" }));
 
 let idCounter = 4;
 
@@ -145,6 +124,22 @@ function CanvasInner() {
   const handleUndo = useCallback(() => applySnapshot(history.undo()), [applySnapshot, history]);
   const handleRedo = useCallback(() => applySnapshot(history.redo()), [applySnapshot, history]);
 
+  const loadSample = useCallback(
+    (index) => {
+      const sample = SAMPLE_GRAPHS[index];
+      if (!sample) return;
+      const nextNodes = sample.nodes;
+      const nextEdges = sample.edges.map((e) => ({ ...e, animated: true, className: "glow-edge" }));
+      setNodes(nextNodes);
+      setEdges(nextEdges);
+      setSelectedId(null);
+      setGraphId(null); // treat as a fresh, unsaved graph
+      setDeployState("idle");
+      history.reset(nextNodes, nextEdges);
+    },
+    [setNodes, setEdges, history]
+  );
+
   useEffect(() => {
     function onKeyDown(e) {
       const meta = e.ctrlKey || e.metaKey;
@@ -189,6 +184,21 @@ function CanvasInner() {
         <div className="canvas-toolbar">
           <span className="canvas-toolbar-title">Pipeline Canvas</span>
           <div className="canvas-toolbar-actions">
+            <select
+              className="canvas-sample-select"
+              onChange={(e) => e.target.value !== "" && loadSample(Number(e.target.value))}
+              value=""
+              title="Load a sample pipeline"
+            >
+              <option value="" disabled>
+                Load Example…
+              </option>
+              {SAMPLE_GRAPHS.map((g, i) => (
+                <option key={g.name} value={i}>
+                  {g.name}
+                </option>
+              ))}
+            </select>
             <button type="button" onClick={handleUndo} disabled={!history.canUndo} title="Undo (Ctrl+Z)">
               ↶ Undo
             </button>
