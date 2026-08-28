@@ -6,6 +6,7 @@ import {
 } from "react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../lib/api";
+
 import ReactFlow, {
   Background,
   Controls,
@@ -15,6 +16,7 @@ import ReactFlow, {
   useEdgesState,
   ReactFlowProvider,
 } from "reactflow";
+
 import "reactflow/dist/style.css";
 import "./Canvas.css";
 
@@ -93,10 +95,12 @@ function CanvasInner() {
     useState(null);
 
   const [selected, setSelected] = useState(null);
-  const [telemetry, setTelemetry] = useState(null);
-const [telemetryLoading, setTelemetryLoading] = useState(false);
 
-    const updateSelectedNode = (field, value) => {
+  // Live telemetry received from backend WebSocket
+  const [liveTelemetry, setLiveTelemetry] = useState(null);
+
+  // Update selected node
+  const updateSelectedNode = (field, value) => {
     if (!selected) {
       return;
     }
@@ -123,43 +127,56 @@ const [telemetryLoading, setTelemetryLoading] = useState(false);
       },
     }));
   };
+
+  // Live telemetry WebSocket
   useEffect(() => {
-  if (!selected || selected.type !== "sensor") {
-    setTelemetry(null);
-    return;
-  }
+    const ws = new WebSocket(
+      "ws://localhost:4000/ws"
+    );
 
-  const fetchTelemetry = async () => {
-    try {
-      setTelemetryLoading(true);
-
-      const response = await fetch(
-        "http://localhost:4000/api/telemetry/stats"
+    ws.onopen = () => {
+      console.log(
+        "Telemetry WebSocket connected"
       );
+    };
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch telemetry");
+    ws.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data);
+
+        if (message.type === "telemetry") {
+          console.log(
+            "Live telemetry:",
+            message.payload
+          );
+
+          setLiveTelemetry(message.payload);
+        }
+      } catch (error) {
+        console.error(
+          "Invalid WebSocket message:",
+          error
+        );
       }
+    };
 
-      const data = await response.json();
-
-      console.log("Sensor telemetry:", data);
-
-      setTelemetry(data);
-    } catch (error) {
+    ws.onerror = (error) => {
       console.error(
-        "Failed to load sensor telemetry:",
+        "Telemetry WebSocket error:",
         error
       );
+    };
 
-      setTelemetry(null);
-    } finally {
-      setTelemetryLoading(false);
-    }
-  };
+    ws.onclose = () => {
+      console.log(
+        "Telemetry WebSocket disconnected"
+      );
+    };
 
-  fetchTelemetry();
-}, [selected]);
+    return () => {
+      ws.close();
+    };
+  }, []);
 
   // Restore saved graph when Canvas opens
   useEffect(() => {
@@ -176,7 +193,10 @@ const [telemetryLoading, setTelemetryLoading] = useState(false);
       setNodes(graph.nodes || []);
       setEdges(graph.edges || []);
 
-      console.log("Graph restored:", graph);
+      console.log(
+        "Graph restored:",
+        graph
+      );
     } catch (error) {
       console.error(
         "Failed to restore graph:",
@@ -237,8 +257,12 @@ const [telemetryLoading, setTelemetryLoading] = useState(false);
 
       const position =
         reactFlowInstance.project({
-          x: event.clientX - bounds.left,
-          y: event.clientY - bounds.top,
+          x:
+            event.clientX -
+            bounds.left,
+          y:
+            event.clientY -
+            bounds.top,
         });
 
       const newNode = {
@@ -251,7 +275,9 @@ const [telemetryLoading, setTelemetryLoading] = useState(false);
         },
       };
 
-      setNodes((nds) => nds.concat(newNode));
+      setNodes((nds) =>
+        nds.concat(newNode)
+      );
     },
     [reactFlowInstance, setNodes]
   );
@@ -268,9 +294,14 @@ const [telemetryLoading, setTelemetryLoading] = useState(false);
       JSON.stringify(graph)
     );
 
-    console.log("Graph saved:", graph);
+    console.log(
+      "Graph saved:",
+      graph
+    );
 
-    alert("Pipeline saved successfully!");
+    alert(
+      "Pipeline saved successfully!"
+    );
   };
 
   // Deploy graph
@@ -285,11 +316,18 @@ const [telemetryLoading, setTelemetryLoading] = useState(false);
 
       const graphId = graph._id;
 
-      await api.deployGraph(graphId, token);
+      await api.deployGraph(
+        graphId,
+        token
+      );
 
-      alert("Graph deployed successfully!");
+      alert(
+        "Graph deployed successfully!"
+      );
     } catch (err) {
-      alert(`Deploy failed: ${err.message}`);
+      alert(
+        `Deploy failed: ${err.message}`
+      );
     }
   };
 
@@ -311,7 +349,10 @@ const [telemetryLoading, setTelemetryLoading] = useState(false);
               type="button"
               className="canvas-save-btn"
               onClick={() => {
-                console.log("SAVE BUTTON CLICKED");
+                console.log(
+                  "SAVE BUTTON CLICKED"
+                );
+
                 saveGraphToLocalStorage();
               }}
             >
@@ -366,8 +407,8 @@ const [telemetryLoading, setTelemetryLoading] = useState(false);
 
         <div className="canvas-hint">
           <span className="canvas-hint-dot" />
-          Live data flowing — wires glow while
-          telemetry passes through
+          Live data flowing — wires glow
+          while telemetry passes through
         </div>
 
         {selected && (
@@ -379,119 +420,178 @@ const [telemetryLoading, setTelemetryLoading] = useState(false);
 
               <button
                 type="button"
-                onClick={() => setSelected(null)}
+                onClick={() =>
+                  setSelected(null)
+                }
               >
                 ✕
               </button>
             </div>
 
-            <label>Node Label</label>
+            <label>
+              Node Label
+            </label>
 
-<input
-  type="text"
-  value={selected.data.label || ""}
-  onChange={(e) =>
-    updateSelectedNode("label", e.target.value)
-  }
-/>
+            <input
+              type="text"
+              value={
+                selected.data.label || ""
+              }
+              onChange={(e) =>
+                updateSelectedNode(
+                  "label",
+                  e.target.value
+                )
+              }
+            />
 
             <span className="canvas-inspector-type">
               Type: {selected.type}
             </span>
 
-            <label>Node Description</label>
+            <label>
+              Node Description
+            </label>
 
-<input
-  type="text"
-  value={selected.data.sub || ""}
-  onChange={(e) =>
-    updateSelectedNode("sub", e.target.value)
-  }
-/>
+            <input
+              type="text"
+              value={
+                selected.data.sub || ""
+              }
+              onChange={(e) =>
+                updateSelectedNode(
+                  "sub",
+                  e.target.value
+                )
+              }
+            />
 
             <div className="canvas-inspector-details">
+
+              {/* SENSOR */}
               {selected.type === "sensor" && (
+                <>
+                  <div>
+                    <strong>
+                      Source:
+                    </strong>{" "}
+                    WebSocket
+                  </div>
+
+                  <div>
+                    <strong>
+                      Data:
+                    </strong>{" "}
+                    Turbine Telemetry
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: "10px",
+                    }}
+                  >
+                    <strong>
+                      Latest Telemetry
+                    </strong>
+                  </div>
+
+                  {liveTelemetry ? (
+                    <>
+                      {liveTelemetry.temperature !==
+                        undefined && (
+                        <div>
+                          <strong>
+                            Temperature:
+                          </strong>{" "}
+                          {
+                            liveTelemetry.temperature
+                          }{" "}
+                          °C
+                        </div>
+                      )}
+
+                      {liveTelemetry ? (
   <>
     <div>
-      <strong>Source:</strong> WebSocket
+      <strong>Device:</strong>{" "}
+      {liveTelemetry.label}
     </div>
 
     <div>
-      <strong>Data:</strong> Turbine Telemetry
+      <strong>Metric:</strong>{" "}
+      {liveTelemetry.metric}
     </div>
 
-    <div style={{ marginTop: "10px" }}>
-      <strong>Latest Telemetry</strong>
+    <div>
+      <strong>Value:</strong>{" "}
+      {liveTelemetry.value}{" "}
+      {liveTelemetry.unit}
     </div>
-
-    {telemetryLoading && (
-      <div>Loading telemetry...</div>
-    )}
-
-    {!telemetryLoading && telemetry && (
-      <>
-        {telemetry.temperature !== undefined && (
-          <div>
-            <strong>Temperature:</strong>{" "}
-            {telemetry.temperature} °C
-          </div>
-        )}
-
-        {telemetry.pressure !== undefined && (
-          <div>
-            <strong>Pressure:</strong>{" "}
-            {telemetry.pressure}
-          </div>
-        )}
-
-        {telemetry.rpm !== undefined && (
-          <div>
-            <strong>RPM:</strong>{" "}
-            {telemetry.rpm}
-          </div>
-        )}
-      </>
-    )}
-
-    {!telemetryLoading && !telemetry && (
-      <div>
-        No telemetry data available
-      </div>
-    )}
   </>
+) : (
+  <div>
+    Waiting for live telemetry...
+  </div>
 )}
+                    </>
+                  ) : (
+                    <div>
+                      Waiting for live telemetry...
+                    </div>
+                  )}
+                </>
+              )}
 
+              {/* FILTER */}
               {selected.type === "filter" && (
                 <>
                   <div>
-                    <strong>Filter:</strong> Moving Average
+                    <strong>
+                      Filter:
+                    </strong>{" "}
+                    Moving Average
                   </div>
 
                   <div>
-                    <strong>Window:</strong> 10
+                    <strong>
+                      Window:
+                    </strong>{" "}
+                    10
                   </div>
                 </>
               )}
 
+              {/* ACTION */}
               {selected.type === "action" && (
                 <>
                   <div>
-                    <strong>Action:</strong> SMS Alert
+                    <strong>
+                      Action:
+                    </strong>{" "}
+                    SMS Alert
                   </div>
 
                   <div>
-                    <strong>Threshold:</strong> &gt; 80°C
+                    <strong>
+                      Threshold:
+                    </strong>{" "}
+                    &gt; 80°C
                   </div>
                 </>
               )}
 
+              {/* WEBHOOK */}
               {selected.type === "webhook" && (
                 <>
                   <div>
-                    <strong>Action:</strong> Webhook
+                    <strong>
+                      Action:
+                    </strong>{" "}
+                    Webhook
                   </div>
                 </>
               )}
+
             </div>
           </div>
         )}

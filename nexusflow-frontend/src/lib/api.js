@@ -2,7 +2,7 @@
 const BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 /**
- * Thin fetch wrapper
+ * Thin fetch 
  */
 async function request(path, { method = "GET", body, token } = {}) {
   let res;
