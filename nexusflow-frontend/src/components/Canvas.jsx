@@ -4,6 +4,7 @@ import {
   useRef,
   useState,
 } from "react";
+
 import { useAuth } from "../context/AuthContext";
 import { api } from "../lib/api";
 
@@ -35,15 +36,16 @@ const nodeTypes = {
 
 const initialNodes = [
   {
-  id: "1",
-  type: "sensor",
-  position: { x: 40, y: 140 },
-  data: {
-    label: "Turbine Sensor",
-    sub: "Data Source · WebSocket",
-    deviceId: "TUR-014",
+    id: "1",
+    type: "sensor",
+    position: { x: 40, y: 140 },
+    data: {
+      label: "Turbine Sensor",
+      sub: "Data Source · WebSocket",
+      deviceId: "TUR-014",
+    },
   },
-},
+
   {
     id: "2",
     type: "filter",
@@ -53,6 +55,7 @@ const initialNodes = [
       sub: "Filter · window = 10",
     },
   },
+
   {
     id: "3",
     type: "action",
@@ -72,6 +75,7 @@ const initialEdges = [
     animated: true,
     className: "glow-edge",
   },
+
   {
     id: "e2-3",
     source: "2",
@@ -96,9 +100,11 @@ function CanvasInner() {
     useState(null);
 
   const [selected, setSelected] = useState(null);
+  const selectedRef = useRef(null);
 
   // Live telemetry received from backend WebSocket
-  const [liveTelemetry, setLiveTelemetry] = useState(null);
+  const [liveTelemetry, setLiveTelemetry] =
+    useState(null);
 
   // Update selected node
   const updateSelectedNode = (field, value) => {
@@ -145,24 +151,26 @@ function CanvasInner() {
       try {
         const message = JSON.parse(event.data);
 
-       if (message.type === "telemetry") {
-  console.log(
-    "Live telemetry:",
-    message.payload
-  );
+        if (message.type === "telemetry") {
+          console.log(
+            "Live telemetry:",
+            message.payload
+          );
 
-  setLiveTelemetry((current) => {
-    if (
-      selected?.type === "sensor" &&
-      selected?.data?.deviceId ===
-        message.payload.deviceId
-    ) {
-      return message.payload;
-    }
+          setLiveTelemetry((current) => {
+            if (
+              selectedRef.current?.type === "sensor" &&
+              selectedRef.current?.data?.deviceId ===
+              message.payload.deviceId
+              ) {
+              return message.payload;
+             }
 
-    return current;
-  });
-}
+            return current;
+
+            return current;
+          });
+        }
       } catch (error) {
         console.error(
           "Invalid WebSocket message:",
@@ -187,7 +195,7 @@ function CanvasInner() {
     return () => {
       ws.close();
     };
- }, [selected]);
+  }, []);
 
   // Restore saved graph when Canvas opens
   useEffect(() => {
@@ -235,6 +243,7 @@ function CanvasInner() {
   // Allow dropping nodes
   const onDragOver = useCallback((event) => {
     event.preventDefault();
+
     event.dataTransfer.dropEffect = "move";
   }, []);
 
@@ -243,17 +252,20 @@ function CanvasInner() {
     (event) => {
       event.preventDefault();
 
-      const type = event.dataTransfer.getData(
-        "application/nexusflow-node-type"
-      );
+      const type =
+        event.dataTransfer.getData(
+          "application/nexusflow-node-type"
+        );
 
-      const label = event.dataTransfer.getData(
-        "application/nexusflow-node-label"
-      );
+      const label =
+        event.dataTransfer.getData(
+          "application/nexusflow-node-label"
+        );
 
-      const hint = event.dataTransfer.getData(
-        "application/nexusflow-node-hint"
-      );
+      const hint =
+        event.dataTransfer.getData(
+          "application/nexusflow-node-hint"
+        );
 
       if (
         !type ||
@@ -271,6 +283,7 @@ function CanvasInner() {
           x:
             event.clientX -
             bounds.left,
+
           y:
             event.clientY -
             bounds.top,
@@ -280,9 +293,16 @@ function CanvasInner() {
         id: `${Date.now()}`,
         type,
         position,
+
         data: {
           label: label || "New Node",
           sub: hint || "",
+
+          ...(type === "sensor"
+            ? {
+                deviceId: "TUR-014",
+              }
+            : {}),
         },
       };
 
@@ -318,12 +338,13 @@ function CanvasInner() {
   // Deploy graph
   const handleDeploy = async () => {
     try {
-      const graph = await api.createGraph(
-        "Turbine Monitoring Pipeline",
-        nodes,
-        edges,
-        token
-      );
+      const graph =
+        await api.createGraph(
+          "Turbine Monitoring Pipeline",
+          nodes,
+          edges,
+          token
+        );
 
       const graphId = graph._id;
 
@@ -344,18 +365,23 @@ function CanvasInner() {
 
   return (
     <div className="canvas-shell">
+
       <NodePalette />
 
       <div
         className="canvas-area"
         ref={wrapperRef}
       >
+
+        {/* TOOLBAR */}
         <div className="canvas-toolbar">
+
           <span className="canvas-toolbar-title">
             Pipeline Canvas
           </span>
 
           <div className="canvas-toolbar-actions">
+
             <button
               type="button"
               className="canvas-save-btn"
@@ -377,9 +403,11 @@ function CanvasInner() {
             >
               Deploy Pipeline
             </button>
+
           </div>
         </div>
 
+        {/* REACT FLOW */}
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -389,29 +417,44 @@ function CanvasInner() {
           onInit={setReactFlowInstance}
           onDrop={onDrop}
           onDragOver={onDragOver}
-          onNodeClick={(_, node) => {
-  const updatedNode =
-    node.type === "sensor" && !node.data?.deviceId
-      ? {
-          ...node,
-          data: {
-            ...node.data,
-            deviceId: "TUR-014",
-          },
-        }
-      : node;
 
-  setSelected(updatedNode);
-}}
-          onPaneClick={() =>
-            setSelected(null)
-          }
+          onNodeClick={(_, node) => {
+            const updatedNode =
+              node.type === "sensor" &&
+              !node.data?.deviceId
+                ? {
+                    ...node,
+
+                    data: {
+                      ...node.data,
+                      deviceId: "TUR-014",
+                    },
+                  }
+                : node;
+
+            setSelected(updatedNode);
+            selectedRef.current = updatedNode;
+            // Clear old telemetry when selecting a different node
+            if (
+              updatedNode.type !== "sensor"
+            ) {
+              setLiveTelemetry(null);
+            }
+          }}
+
+          onPaneClick={() => {
+            setSelected(null);
+            setLiveTelemetry(null);
+          }}
+
           nodeTypes={nodeTypes}
           fitView
+
           proOptions={{
             hideAttribution: true,
           }}
         >
+
           <MiniMap
             pannable
             zoomable
@@ -425,31 +468,43 @@ function CanvasInner() {
             size={1}
             color="#dbe2ea"
           />
+
         </ReactFlow>
 
+        {/* CANVAS HINT */}
         <div className="canvas-hint">
+
           <span className="canvas-hint-dot" />
+
           Live data flowing — wires glow
           while telemetry passes through
+
         </div>
 
+        {/* INSPECTOR */}
         {selected && (
           <div className="canvas-inspector">
+
+            {/* INSPECTOR HEADER */}
             <div className="canvas-inspector-head">
+
               <span className="canvas-inspector-label">
                 Selected Node
               </span>
 
               <button
                 type="button"
-                onClick={() =>
-                  setSelected(null)
-                }
+                onClick={() => {
+                  setSelected(null);
+                  setLiveTelemetry(null);
+                }}
               >
                 ✕
               </button>
+
             </div>
 
+            {/* NODE LABEL */}
             <label>
               Node Label
             </label>
@@ -457,7 +512,7 @@ function CanvasInner() {
             <input
               type="text"
               value={
-                selected.data.label || ""
+                selected.data?.label || ""
               }
               onChange={(e) =>
                 updateSelectedNode(
@@ -467,10 +522,12 @@ function CanvasInner() {
               }
             />
 
+            {/* NODE TYPE */}
             <span className="canvas-inspector-type">
               Type: {selected.type}
             </span>
 
+            {/* NODE DESCRIPTION */}
             <label>
               Node Description
             </label>
@@ -478,7 +535,7 @@ function CanvasInner() {
             <input
               type="text"
               value={
-                selected.data.sub || ""
+                selected.data?.sub || ""
               }
               onChange={(e) =>
                 updateSelectedNode(
@@ -488,84 +545,102 @@ function CanvasInner() {
               }
             />
 
+            {/* DETAILS */}
             <div className="canvas-inspector-details">
 
-              {/* SENSOR */}
-             {/* SENSOR */}
-{selected.type === "sensor" && (
-  <>
-    <div>
-      <strong>Source:</strong>{" "}
-      WebSocket
-    </div>
+              {/* ================= SENSOR ================= */}
+              {selected.type === "sensor" && (
+                <>
+                  <div>
+                    <strong>
+                      Source:
+                    </strong>{" "}
+                    WebSocket
+                  </div>
 
-    <div>
-      <strong>Data:</strong>{" "}
-      Turbine Telemetry
-    </div>
+                  <div>
+                    <strong>
+                      Data:
+                    </strong>{" "}
+                    Turbine Telemetry
+                  </div>
 
-    <div
-      style={{
-        marginTop: "10px",
-      }}
-    >
-      <strong>Latest Telemetry</strong>
-    </div>
+                  <div
+                    style={{
+                      marginTop: "10px",
+                    }}
+                  >
+                    <strong>
+                      Latest Telemetry
+                    </strong>
+                  </div>
 
-    {liveTelemetry ? (
-      <div className="telemetry-details">
-        <div className="telemetry-row">
-          <span className="telemetry-label">
-            Device
-          </span>
+                  {liveTelemetry ? (
+                    <div className="telemetry-details">
 
-          <span className="telemetry-value">
-            {liveTelemetry.label ||
-              liveTelemetry.deviceId ||
-              "—"}
-          </span>
-        </div>
+                      <div className="telemetry-row">
 
-        <div className="telemetry-row">
-          <span className="telemetry-label">
-            Metric
-          </span>
+                        <span className="telemetry-label">
+                          Device
+                        </span>
 
-          <span className="telemetry-value">
-            {liveTelemetry.metric || "—"}
-          </span>
-        </div>
+                        <span className="telemetry-value">
+                          {liveTelemetry.label ||
+                            liveTelemetry.deviceId ||
+                            "—"}
+                        </span>
 
-        <div className="telemetry-row">
-          <span className="telemetry-label">
-            Value
-          </span>
+                      </div>
 
-          <span className="telemetry-value">
-            {liveTelemetry.value ?? "—"}
-          </span>
-        </div>
+                      <div className="telemetry-row">
 
-        <div className="telemetry-row">
-          <span className="telemetry-label">
-            Unit
-          </span>
+                        <span className="telemetry-label">
+                          Metric
+                        </span>
 
-          <span className="telemetry-value">
-            {liveTelemetry.unit || "—"}
-          </span>
-        </div>
-      </div>
-    ) : (
-      <div className="telemetry-waiting">
-        Waiting for live telemetry...
-      </div>
-    )}
-  </>
-)}
+                        <span className="telemetry-value">
+                          {liveTelemetry.metric ||
+                            "—"}
+                        </span>
 
+                      </div>
 
-              {/* FILTER */}
+                      <div className="telemetry-row">
+
+                        <span className="telemetry-label">
+                          Value
+                        </span>
+
+                        <span className="telemetry-value">
+                          {liveTelemetry.value ??
+                            "—"}
+                        </span>
+
+                      </div>
+
+                      <div className="telemetry-row">
+
+                        <span className="telemetry-label">
+                          Unit
+                        </span>
+
+                        <span className="telemetry-value">
+                          {liveTelemetry.unit ||
+                            "—"}
+                        </span>
+
+                      </div>
+
+                    </div>
+                  ) : (
+                    <div className="telemetry-waiting">
+                      Waiting for live telemetry...
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* ================= FILTER ================= */}
               {selected.type === "filter" && (
                 <>
                   <div>
@@ -584,7 +659,7 @@ function CanvasInner() {
                 </>
               )}
 
-              {/* ACTION */}
+              {/* ================= ACTION ================= */}
               {selected.type === "action" && (
                 <>
                   <div>
@@ -603,7 +678,7 @@ function CanvasInner() {
                 </>
               )}
 
-              {/* WEBHOOK */}
+              {/* ================= WEBHOOK ================= */}
               {selected.type === "webhook" && (
                 <>
                   <div>
@@ -618,6 +693,7 @@ function CanvasInner() {
             </div>
           </div>
         )}
+
       </div>
     </div>
   );

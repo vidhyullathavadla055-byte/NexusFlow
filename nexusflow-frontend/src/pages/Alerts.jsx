@@ -44,8 +44,13 @@ function Alerts() {
 
   const resolveAlert = (id) => {
   setAlerts((currentAlerts) => {
-    const updatedAlerts = currentAlerts.filter(
-      (alert) => alert.id !== id
+    const updatedAlerts = currentAlerts.map((alert) =>
+      alert.id === id
+        ? {
+            ...alert,
+            status: "resolved",
+          }
+        : alert
     );
 
     localStorage.setItem(
@@ -56,6 +61,7 @@ function Alerts() {
     return updatedAlerts;
   });
 };
+
 
   const criticalCount = alerts.filter(
     (alert) => alert.severity === "critical"
@@ -74,6 +80,9 @@ function Alerts() {
   ).length;
 
   const filteredAlerts = alerts.filter((alert) => {
+    if (alert.status === "resolved") {
+  return false;
+}
     const search = searchTerm.trim().toLowerCase();
 
     const matchesSearch =
@@ -87,6 +96,9 @@ function Alerts() {
 
     return matchesSearch && matchesSeverity;
   });
+  const resolvedAlerts = alerts.filter(
+  (alert) => alert.status === "resolved"
+);
 
   return (
     <div className="page-shell">
@@ -143,6 +155,43 @@ function Alerts() {
           <h2>Active Alerts</h2>
           <span>{filteredAlerts.length} alerts</span>
         </div>
+        {resolvedAlerts.length > 0 && (
+  <div className="page-card resolved-alerts">
+    <div className="alerts-list-header">
+      <h2>Resolved Alerts</h2>
+      <span>{resolvedAlerts.length} alerts</span>
+    </div>
+
+    <ul className="alerts-list">
+      {resolvedAlerts.map((alert) => (
+        <li
+          key={alert.id}
+          className={`alerts-item alerts-item--${alert.severity}`}
+        >
+          <span className="alerts-dot" />
+
+          <span className="alerts-message">
+            {alert.message}
+          </span>
+
+          <span className="alerts-device">
+            {alert.device}
+          </span>
+
+          <span
+            className={`severity-badge severity-${alert.severity}`}
+          >
+            {alert.severity}
+          </span>
+
+          <span className="resolved-badge">
+          Resolved
+          </span>
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
 
         {filteredAlerts.length === 0 ? (
           <div className="no-alerts">

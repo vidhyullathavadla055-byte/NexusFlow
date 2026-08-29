@@ -243,3 +243,19 @@
 .reset-alerts-btn:hover {
   background: #cbd5e1;
 }
+/* Resolved alert status */
+.resolved-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 90px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  background: #e8f7ee;
+  color: #21864b;
+  border: 1px solid #b9e5c8;
+  margin-left: auto;
+}
