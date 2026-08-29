@@ -35,14 +35,15 @@ const nodeTypes = {
 
 const initialNodes = [
   {
-    id: "1",
-    type: "sensor",
-    position: { x: 40, y: 140 },
-    data: {
-      label: "Turbine Sensor",
-      sub: "Data Source · WebSocket",
-    },
+  id: "1",
+  type: "sensor",
+  position: { x: 40, y: 140 },
+  data: {
+    label: "Turbine Sensor",
+    sub: "Data Source · WebSocket",
+    deviceId: "TUR-014",
   },
+},
   {
     id: "2",
     type: "filter",
@@ -144,14 +145,24 @@ function CanvasInner() {
       try {
         const message = JSON.parse(event.data);
 
-        if (message.type === "telemetry") {
-          console.log(
-            "Live telemetry:",
-            message.payload
-          );
+       if (message.type === "telemetry") {
+  console.log(
+    "Live telemetry:",
+    message.payload
+  );
 
-          setLiveTelemetry(message.payload);
-        }
+  setLiveTelemetry((current) => {
+    if (
+      selected?.type === "sensor" &&
+      selected?.data?.deviceId ===
+        message.payload.deviceId
+    ) {
+      return message.payload;
+    }
+
+    return current;
+  });
+}
       } catch (error) {
         console.error(
           "Invalid WebSocket message:",
@@ -176,7 +187,7 @@ function CanvasInner() {
     return () => {
       ws.close();
     };
-  }, []);
+ }, [selected]);
 
   // Restore saved graph when Canvas opens
   useEffect(() => {
@@ -378,9 +389,20 @@ function CanvasInner() {
           onInit={setReactFlowInstance}
           onDrop={onDrop}
           onDragOver={onDragOver}
-          onNodeClick={(_, node) =>
-            setSelected(node)
-          }
+          onNodeClick={(_, node) => {
+  const updatedNode =
+    node.type === "sensor" && !node.data?.deviceId
+      ? {
+          ...node,
+          data: {
+            ...node.data,
+            deviceId: "TUR-014",
+          },
+        }
+      : node;
+
+  setSelected(updatedNode);
+}}
           onPaneClick={() =>
             setSelected(null)
           }
@@ -469,78 +491,79 @@ function CanvasInner() {
             <div className="canvas-inspector-details">
 
               {/* SENSOR */}
-              {selected.type === "sensor" && (
-                <>
-                  <div>
-                    <strong>
-                      Source:
-                    </strong>{" "}
-                    WebSocket
-                  </div>
-
-                  <div>
-                    <strong>
-                      Data:
-                    </strong>{" "}
-                    Turbine Telemetry
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: "10px",
-                    }}
-                  >
-                    <strong>
-                      Latest Telemetry
-                    </strong>
-                  </div>
-
-                  {liveTelemetry ? (
-                    <>
-                      {liveTelemetry.temperature !==
-                        undefined && (
-                        <div>
-                          <strong>
-                            Temperature:
-                          </strong>{" "}
-                          {
-                            liveTelemetry.temperature
-                          }{" "}
-                          °C
-                        </div>
-                      )}
-
-                      {liveTelemetry ? (
+             {/* SENSOR */}
+{selected.type === "sensor" && (
   <>
     <div>
-      <strong>Device:</strong>{" "}
-      {liveTelemetry.label}
+      <strong>Source:</strong>{" "}
+      WebSocket
     </div>
 
     <div>
-      <strong>Metric:</strong>{" "}
-      {liveTelemetry.metric}
+      <strong>Data:</strong>{" "}
+      Turbine Telemetry
     </div>
 
-    <div>
-      <strong>Value:</strong>{" "}
-      {liveTelemetry.value}{" "}
-      {liveTelemetry.unit}
+    <div
+      style={{
+        marginTop: "10px",
+      }}
+    >
+      <strong>Latest Telemetry</strong>
     </div>
+
+    {liveTelemetry ? (
+      <div className="telemetry-details">
+        <div className="telemetry-row">
+          <span className="telemetry-label">
+            Device
+          </span>
+
+          <span className="telemetry-value">
+            {liveTelemetry.label ||
+              liveTelemetry.deviceId ||
+              "—"}
+          </span>
+        </div>
+
+        <div className="telemetry-row">
+          <span className="telemetry-label">
+            Metric
+          </span>
+
+          <span className="telemetry-value">
+            {liveTelemetry.metric || "—"}
+          </span>
+        </div>
+
+        <div className="telemetry-row">
+          <span className="telemetry-label">
+            Value
+          </span>
+
+          <span className="telemetry-value">
+            {liveTelemetry.value ?? "—"}
+          </span>
+        </div>
+
+        <div className="telemetry-row">
+          <span className="telemetry-label">
+            Unit
+          </span>
+
+          <span className="telemetry-value">
+            {liveTelemetry.unit || "—"}
+          </span>
+        </div>
+      </div>
+    ) : (
+      <div className="telemetry-waiting">
+        Waiting for live telemetry...
+      </div>
+    )}
   </>
-) : (
-  <div>
-    Waiting for live telemetry...
-  </div>
 )}
-                    </>
-                  ) : (
-                    <div>
-                      Waiting for live telemetry...
-                    </div>
-                  )}
-                </>
-              )}
+
 
               {/* FILTER */}
               {selected.type === "filter" && (

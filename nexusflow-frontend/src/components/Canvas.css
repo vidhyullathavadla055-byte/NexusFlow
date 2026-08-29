@@ -378,3 +378,39 @@
 .canvas-save-btn:active {
   transform: translateY(0);
 }
+.telemetry-details {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.telemetry-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.telemetry-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.telemetry-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  text-align: right;
+}
+
+.telemetry-waiting {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #64748b;
+}
