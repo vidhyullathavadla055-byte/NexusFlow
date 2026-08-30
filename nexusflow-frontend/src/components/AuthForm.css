@@ -22,7 +22,7 @@
 .auth-forgot {
   font-size: 12.5px;
   font-weight: 500;
-  color: #2563eb;
+  color: #b45309;
   text-decoration: none;
 }
 .auth-forgot:hover {
@@ -45,7 +45,7 @@
 }
 
 .auth-field input:focus {
-  border-color: #2563eb;
+  border-color: #b45309;
   background: #fff;
 }
 
@@ -64,7 +64,7 @@
   right: 10px;
   border: none;
   background: none;
-  color: #2563eb;
+  color: #b45309;
   font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
@@ -89,12 +89,12 @@
   font-size: 15px;
   font-weight: 700;
   color: #fff;
-  background: #2563eb;
+  background: #b45309;
   cursor: pointer;
   transition: background 0.15s, transform 0.05s;
 }
 .auth-submit:hover:not(:disabled) {
-  background: #1d4ed8;
+  background: #92400e;
 }
 .auth-submit:active:not(:disabled) {
   transform: translateY(1px);
@@ -118,7 +118,7 @@
   margin: 22px 0 0;
 }
 .auth-switch a {
-  color: #2563eb;
+  color: #b45309;
   font-weight: 600;
   text-decoration: none;
 }

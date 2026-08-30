@@ -79,6 +79,19 @@
   margin-bottom: 20px;
 }
 
+.dashboard-live-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 900px) {
+  .dashboard-live-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .kpi-card {
   display: flex;
   flex-direction: column;
@@ -139,7 +152,7 @@
 .dashboard-cta-secondary {
   font-size: 13.5px;
   font-weight: 600;
-  color: #2563eb;
+  color: #b45309;
   text-decoration: none;
 }
 
@@ -326,7 +339,7 @@
 /* ── Settings ── */
 .settings-save-btn {
   padding: 10px 22px;
-  background: #2563eb;
+  background: #b45309;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -336,7 +349,7 @@
   transition: background 0.15s;
 }
 
-.settings-save-btn:hover { background: #1d4ed8; }
+.settings-save-btn:hover { background: #92400e; }
 
 .settings-save-btn:disabled {
   opacity: 0.6;
@@ -371,7 +384,7 @@
 
 .settings-field input:focus {
   outline: none;
-  border-color: #2563eb;
+  border-color: #b45309;
 }
 
 .settings-error {

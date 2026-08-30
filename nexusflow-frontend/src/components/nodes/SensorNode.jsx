@@ -6,11 +6,14 @@ function SensorNode({ data }) {
     <div className="flow-node flow-node--blue">
       <div className="flow-node-bar" />
       <div className="flow-node-body">
-        <strong>{data.label}</strong>
+        <div className="flow-node-title-row">
+          <strong>{data.label}</strong>
+          <span className={`flow-node-status flow-node-status--${data.status || "idle"}`} title={data.status || "idle"} />
+        </div>
         <small>{data.sub}</small>
       </div>
-      <Handle type="target" position={Position.Left} style={{ background: "#2563eb" }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#2563eb" }} />
+      <Handle type="target" position={Position.Left} />
+      <Handle type="source" position={Position.Right} />
     </div>
   );
 }

@@ -1,0 +1,59 @@
+/*
+ * NexusFlow design tokens.
+ *
+ * Direction: an operations console for industrial sensors — the visual
+ * language borrows from instrument panels, not generic SaaS. A dark
+ * graphite nav rail (like the bezel around a monitor) frames a light,
+ * quiet workspace. Amber is the single alert/action accent (the color of
+ * warning lamps and caution tape on real equipment); cyan is reserved
+ * only for "live/streaming" states, so the two never compete for meaning.
+ * Numbers and device IDs are set in a monospace face, like a
+ * seven-segment readout, to read as instrumentation rather than prose.
+ */
+
+:root {
+  /* Graphite — the instrument-panel surfaces (nav rail, dark chrome) */
+  --graphite-950: #12161b;
+  --graphite-900: #171c22;
+  --graphite-800: #232a32;
+  --graphite-700: #333c46;
+  --graphite-500: #64748b;
+
+  /* Paper — the light workspace */
+  --paper: #f3f4f2;
+  --surface: #ffffff;
+  --border: #e2e5e4;
+  --border-strong: #cbd1cf;
+
+  /* Ink — text */
+  --ink-900: #14181c;
+  --ink-700: #3a4249;
+  --ink-500: #667079;
+  --ink-400: #8a939a;
+
+  /* Signal amber — the single accent for actions, alerts, warnings */
+  --amber-700: #92400e;
+  --amber-600: #b45309;
+  --amber-500: #d97706;
+  --amber-100: #fef3c7;
+
+  /* Live cyan — reserved for "streaming/connected" states only */
+  --cyan-700: #0e7490;
+  --cyan-600: #0891b2;
+  --cyan-100: #cffafe;
+
+  /* Functional status — kept universal, not part of the creative palette */
+  --critical: #dc2626;
+  --critical-soft: #fee2e2;
+  --ok: #16a34a;
+  --ok-soft: #dcfce7;
+
+  /* Type */
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Consolas, monospace;
+
+  --shadow-sm: 0 1px 2px rgba(18, 22, 27, 0.06);
+  --shadow-md: 0 4px 16px rgba(18, 22, 27, 0.08);
+  --radius: 8px;
+}

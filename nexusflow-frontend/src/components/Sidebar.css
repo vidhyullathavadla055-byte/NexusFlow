@@ -3,23 +3,24 @@
   min-width: 230px;
   min-height: 100vh;
 
-  background: #0f172a;
+  background: var(--graphite-950);
   color: #ffffff;
 
   box-sizing: border-box;
-  padding: 22px 14px;
+  padding: 22px 14px 16px;
 
   display: flex;
   flex-direction: column;
 
-  border-right: 1px solid #1e293b;
+  border-right: 1px solid var(--graphite-800);
 }
 
 /* NexusFlow brand */
 .sidebar-brand {
   color: #ffffff;
+  font-family: var(--font-display);
 
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 700;
 
   padding: 4px 14px 28px;
@@ -28,7 +29,7 @@
 }
 
 .sidebar-brand span {
-  color: #60a5fa;
+  color: var(--amber-500);
 }
 
 /* Navigation */
@@ -36,6 +37,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  flex: 1;
 }
 
 .sidebar-link {
@@ -50,7 +52,7 @@
 
   border-radius: 7px;
 
-  color: #cbd5e1;
+  color: #b8c0c9;
   text-decoration: none;
 
   font-size: 14px;
@@ -62,14 +64,56 @@
 }
 
 .sidebar-link:hover {
-  background: #1e293b;
+  background: var(--graphite-800);
   color: #ffffff;
 }
 
 .sidebar-link.active {
-  background: #2563eb;
+  background: var(--amber-600);
   color: #ffffff;
   font-weight: 600;
+}
+
+/* Live connection readout — mirrors the instrument-panel signature used
+   on the Dashboard/Canvas live indicators. */
+.sidebar-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--graphite-800);
+
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: #8a939a;
+}
+
+.sidebar-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #5a6470;
+  flex-shrink: 0;
+}
+
+.sidebar-status-dot--on {
+  background: var(--cyan-600);
+  box-shadow: 0 0 0 0 rgba(8, 145, 178, 0.6);
+  animation: sidebar-pulse 1.8s ease-out infinite;
+}
+
+@keyframes sidebar-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(8, 145, 178, 0.55); }
+  70% { box-shadow: 0 0 0 6px rgba(8, 145, 178, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(8, 145, 178, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-status-dot--on {
+    animation: none;
+  }
 }
 
 /* Mobile */

@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useLiveTelemetry } from "../lib/useLiveTelemetry";
 import { api } from "../lib/api";
+import LiveChart from "../components/LiveChart";
+import AlertFeed from "../components/AlertFeed";
 import "./Dashboard.css";
 
 function isToday(dateLike) {
@@ -62,6 +65,11 @@ function Dashboard() {
         <KpiCard label="Devices Online" value={kpis.devicesOnline} sub="registered sensors" />
       </div>
 
+      <div className="dashboard-live-grid">
+        <LiveChart />
+        <AlertFeed />
+      </div>
+
       <div className="page-card dashboard-cta">
         <div>
           <h3>Build or edit a pipeline</h3>
@@ -84,7 +92,7 @@ function KpiCard({ label, value, sub }) {
   return (
     <div className="kpi-card">
       <span className="kpi-label">{label}</span>
-      <span className="kpi-value">{value ?? "—"}</span>
+      <span className="kpi-value mono">{value ?? "—"}</span>
       <span className="kpi-sub">{sub}</span>
     </div>
   );

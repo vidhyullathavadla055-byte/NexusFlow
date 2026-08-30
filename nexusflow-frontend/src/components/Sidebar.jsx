@@ -1,10 +1,15 @@
 import { NavLink } from "react-router-dom";
+import { useLiveTelemetry } from "../lib/useLiveTelemetry";
 import "./Sidebar.css";
 
 function Sidebar() {
+  const { connected } = useLiveTelemetry();
+
   return (
     <aside className="sidebar">
-      <h2 className="sidebar-logo">NexusFlow</h2>
+      <h2 className="sidebar-brand">
+        Nexus<span>Flow</span>
+      </h2>
 
       <nav className="sidebar-nav">
         <NavLink to="/" end className="sidebar-link">
@@ -31,6 +36,11 @@ function Sidebar() {
           Settings
         </NavLink>
       </nav>
+
+      <div className="sidebar-status">
+        <span className={`sidebar-status-dot ${connected ? "sidebar-status-dot--on" : ""}`} />
+        {connected ? "Live stream connected" : "Reconnecting…"}
+      </div>
     </aside>
   );
 }

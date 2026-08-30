@@ -1,0 +1,86 @@
+.alert-feed {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.alert-feed-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.alert-feed-head h3 {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.alert-feed-live-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cyan-700);
+  background: var(--cyan-100);
+  padding: 2px 7px;
+  border-radius: 20px;
+}
+
+.alert-feed-empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-400);
+}
+
+.alert-feed-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.alert-feed-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.alert-feed-item:last-child {
+  border-bottom: none;
+}
+
+.alert-feed-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+.alert-feed-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.alert-feed-title {
+  font-size: 13.5px;
+  color: var(--ink-900);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.alert-feed-meta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-400);
+}

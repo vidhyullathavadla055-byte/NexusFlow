@@ -14,7 +14,7 @@ export function deployGraph(graphId, graph) {
   const subscriptions = compiled.map(({ node, observable }) =>
     observable.subscribe({
       next: (value) => handleActionFire(graphId, graph, node, value),
-      error: (err) => console.error(`[ruleRunner] pipeline error on graph ${graphId}:`, err.message),
+      error: (err) => handlePipelineError(graphId, graph, err),
     })
   );
 
@@ -77,6 +77,11 @@ async function handleActionFire(graphId, graph, actionNode, value) {
   const summary = `Rule "${graph.name || graphId}" fired — ${label} (${actionType})`;
   console.log(`[ruleRunner] ${summary} — value=${JSON.stringify(value)}`);
 
+  // Action nodes don't carry a deviceId themselves (only Data Source nodes
+  // do) — take the graph's first Data Source as a reasonable "which device
+  // caused this" for the alert/activity feeds.
+  const deviceId = graph.nodes.find((n) => n.type === "dataSource")?.data?.deviceId;
+
   // SMS/Webhook actions go through deliveryService.js, so a live
   // rule-fired action gets the same retry-with-backoff and delivery-history
   // logging as everywhere else (previously this called sendSms/callWebhook
@@ -96,6 +101,7 @@ async function handleActionFire(graphId, graph, actionNode, value) {
   const alert = await recordAlert({
     graphId,
     nodeId: actionNode.id,
+    deviceId,
     actionType,
     target,
     value,
@@ -109,7 +115,7 @@ async function handleActionFire(graphId, graph, actionNode, value) {
     type: "rule_trigger",
     message: summary,
     graphId,
-    deviceId: actionNode.data?.deviceId,
+    deviceId,
     meta: { actionType, target, delivered: !!deliveryResult.ok },
   });
 }

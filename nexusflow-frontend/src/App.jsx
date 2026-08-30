@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { LiveDataProvider } from "./context/LiveDataContext";
 
 import Login from "./components/Login";
 import Signup from "./components/Signup";
@@ -40,7 +41,9 @@ function AppRoutes() {
       <Route
         element={
           <ProtectedRoute>
-            <Layout />
+            <LiveDataProvider>
+              <Layout />
+            </LiveDataProvider>
           </ProtectedRoute>
         }
       >

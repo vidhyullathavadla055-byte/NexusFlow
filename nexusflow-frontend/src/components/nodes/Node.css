@@ -1,16 +1,16 @@
 .flow-node {
   min-width: 190px;
-  background: #fff;
+  background: var(--surface);
   border-radius: 10px;
-  border: 2px solid #cbd5e1;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 2px solid var(--border-strong);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
-  font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-body);
   transition: box-shadow 0.15s, transform 0.1s;
 }
 
 .flow-node:hover {
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
 }
 
 .flow-node.selected,
@@ -30,33 +30,84 @@
   gap: 3px;
 }
 
+.flow-node-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .flow-node-body strong {
   font-size: 13.5px;
-  color: #0f172a;
+  color: var(--ink-900);
   font-weight: 700;
 }
 
 .flow-node-body small {
+  font-family: var(--font-mono);
   font-size: 11px;
-  color: #64748b;
+  color: var(--ink-500);
 }
 
-.flow-node--blue { border-color: #2563eb; }
-.flow-node--blue .flow-node-bar { background: #2563eb; }
+.flow-node--blue { border-color: var(--amber-600); }
+.flow-node--blue .flow-node-bar { background: var(--amber-600); }
+.flow-node--blue .react-flow__handle { background: var(--amber-600); }
 
-.flow-node--green { border-color: #10b981; }
-.flow-node--green .flow-node-bar { background: #10b981; }
+.flow-node--green { border-color: var(--cyan-700); }
+.flow-node--green .flow-node-bar { background: var(--cyan-700); }
+.flow-node--green .react-flow__handle { background: var(--cyan-700); }
 
-.flow-node--red { border-color: #ef4444; }
-.flow-node--red .flow-node-bar { background: #ef4444; }
+.flow-node--red { border-color: var(--critical); }
+.flow-node--red .flow-node-bar { background: var(--critical); }
+.flow-node--red .react-flow__handle { background: var(--critical); }
 
 .react-flow__handle {
   width: 10px;
   height: 10px;
-  border: 2px solid #fff;
+  border: 2px solid var(--surface);
 }
 
-.flow-node--blue ~ .react-flow__handle,
-.react-flow__node .flow-node--blue + .react-flow__handle {
-  background: #2563eb;
+/* Live status indicator — reflects real telemetry/deploy/fire state,
+   computed in Canvas.jsx and passed in as data.status. */
+.flow-node-status {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--ink-400); /* idle */
+}
+
+.flow-node-status--active {
+  background: var(--cyan-600);
+  box-shadow: 0 0 0 0 rgba(8, 145, 178, 0.55);
+  animation: node-pulse 1.6s ease-out infinite;
+}
+
+.flow-node-status--warning {
+  background: var(--amber-500);
+}
+
+.flow-node-status--critical {
+  background: var(--critical);
+  box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.55);
+  animation: node-pulse-critical 1s ease-out infinite;
+}
+
+@keyframes node-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(8, 145, 178, 0.5); }
+  70% { box-shadow: 0 0 0 5px rgba(8, 145, 178, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(8, 145, 178, 0); }
+}
+
+@keyframes node-pulse-critical {
+  0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5); }
+  70% { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-node-status--active,
+  .flow-node-status--critical {
+    animation: none;
+  }
 }

@@ -34,6 +34,6 @@
 .inspector-field input:focus,
 .inspector-field select:focus {
   outline: none;
-  border-color: #6366f1;
+  border-color: #b45309;
   background: #ffffff;
 }

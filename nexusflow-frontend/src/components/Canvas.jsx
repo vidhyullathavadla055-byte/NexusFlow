@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useLiveTelemetry } from "../lib/useLiveTelemetry";
 import { api } from "../lib/api";
 import { useGraphHistory, toJSON } from "../lib/useGraphHistory";
 import ReactFlow, {
@@ -16,6 +17,7 @@ import "./Canvas.css";
 
 import NodePalette from "./NodePalette";
 import Inspector from "./Inspector";
+import GlowEdge from "./GlowEdge";
 import DataSourceNode from "./nodes/SensorNode";
 import MathOpNode from "./nodes/FilterNode";
 import ActionNode from "./nodes/ActionNode";
@@ -32,9 +34,13 @@ const nodeTypes = {
   action: ActionNode,
 };
 
+const edgeTypes = { glow: GlowEdge };
+const READING_FRESH_MS = 8000; // a dataSource node reads "active" if it saw data this recently
+const FIRED_FLASH_MS = 2500; // how long an action node flashes after firing
+
 const defaultGraph = getDefaultGraph();
 const initialNodes = defaultGraph.nodes;
-const initialEdges = defaultGraph.edges.map((e) => ({ ...e, animated: true, className: "glow-edge" }));
+const initialEdges = defaultGraph.edges.map((e) => ({ ...e, type: "glow" }));
 
 let idCounter = 4;
 
@@ -51,6 +57,50 @@ function CanvasInner() {
 
   const history = useGraphHistory(initialNodes, initialEdges);
   const selected = nodes.find((n) => n.id === selectedId) || null;
+  const { latestByDevice, alerts } = useLiveTelemetry();
+
+  // Node status indicators (Week 4): an action node flashes for a few
+  // seconds right after it fires. Track "fired at" per node id from the
+  // live alert stream — only alerts for *this* deployed graph count.
+  const [firedAt, setFiredAt] = useState({}); // nodeId -> timestamp
+  useEffect(() => {
+    if (!graphId || alerts.length === 0) return;
+    const relevant = alerts.filter((a) => a.graphId === graphId);
+    if (relevant.length === 0) return;
+    setFiredAt((prev) => {
+      const next = { ...prev };
+      relevant.forEach((a) => (next[a.nodeId] = Date.now()));
+      return next;
+    });
+  }, [alerts, graphId]);
+
+  // Re-render periodically so "fresh reading" / "recently fired" windows
+  // actually expire in the UI instead of sticking forever.
+  const [, forceTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => forceTick((n) => n + 1), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Derived render-only status, kept OUT of the real `nodes` state so it
+  // never gets persisted into a saved graph (toJSON serializes node.data
+  // as-is) — this is purely what gets handed to <ReactFlow>.
+  const renderNodes = useMemo(() => {
+    const now = Date.now();
+    return nodes.map((n) => {
+      let status = "idle";
+      if (n.type === "dataSource") {
+        const reading = latestByDevice[n.data.deviceId];
+        if (reading && now - reading.t < READING_FRESH_MS) status = reading.status === "normal" ? "active" : reading.status;
+      } else if (n.type === "action") {
+        const last = firedAt[n.id];
+        if (last && now - last < FIRED_FLASH_MS) status = "active";
+      } else if (n.type === "mathOp") {
+        status = deployState === "live" ? "active" : "idle";
+      }
+      return { ...n, data: { ...n.data, status } };
+    });
+  }, [nodes, latestByDevice, firedAt, deployState]);
 
   useEffect(() => {
     api.getDevices().then(setDevices).catch(() => setDevices([]));
@@ -59,7 +109,7 @@ function CanvasInner() {
   const onConnect = useCallback(
     (params) => {
       setEdges((eds) => {
-        const next = addEdge({ ...params, animated: true, className: "glow-edge" }, eds);
+        const next = addEdge({ ...params, type: "glow" }, eds);
         history.commit(nodes, next);
         return next;
       });
@@ -129,7 +179,7 @@ function CanvasInner() {
       const sample = SAMPLE_GRAPHS[index];
       if (!sample) return;
       const nextNodes = sample.nodes;
-      const nextEdges = sample.edges.map((e) => ({ ...e, animated: true, className: "glow-edge" }));
+      const nextEdges = sample.edges.map((e) => ({ ...e, type: "glow" }));
       setNodes(nextNodes);
       setEdges(nextEdges);
       setSelectedId(null);
@@ -217,7 +267,7 @@ function CanvasInner() {
         </div>
 
         <ReactFlow
-          nodes={nodes}
+          nodes={renderNodes}
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
@@ -228,6 +278,7 @@ function CanvasInner() {
           onNodeClick={(_, node) => setSelectedId(node.id)}
           onPaneClick={() => setSelectedId(null)}
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           fitView
           proOptions={{ hideAttribution: true }}
         >
