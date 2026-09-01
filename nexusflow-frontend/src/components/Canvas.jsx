@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useLiveTelemetry } from "../lib/useLiveTelemetry";
+import { useToast } from "../context/ToastContext";
 import { api } from "../lib/api";
 import { useGraphHistory, toJSON } from "../lib/useGraphHistory";
 import ReactFlow, {
@@ -46,6 +47,7 @@ let idCounter = 4;
 
 function CanvasInner() {
   const { token } = useAuth();
+  const toast = useToast();
   const wrapperRef = useRef(null);
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -220,9 +222,10 @@ function CanvasInner() {
 
       await api.deployGraph(graph._id, token);
       setDeployState("live");
+      toast.success("Pipeline deployed and live.");
     } catch (err) {
       setDeployState("error");
-      alert(`Deploy failed: ${err.message}`);
+      toast.error(`Deploy failed: ${err.message}`);
     }
   };
 

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import { api } from "../lib/api";
 import "./Dashboard.css";
 
@@ -118,6 +119,7 @@ const CHANNELS = [
 ];
 
 function NotificationsCard({ user, token, onSaved }) {
+  const toast = useToast();
   const [prefs, setPrefs] = useState(user?.notifications || { sms: true, email: true, webhook: false });
   const [savingKey, setSavingKey] = useState(null);
 
@@ -130,7 +132,7 @@ function NotificationsCard({ user, token, onSaved }) {
       onSaved(updated);
     } catch (err) {
       setPrefs(prefs); // revert on failure
-      alert(`Couldn't update notifications: ${err.message}`);
+      toast.error(`Couldn't update notifications: ${err.message}`);
     } finally {
       setSavingKey(null);
     }

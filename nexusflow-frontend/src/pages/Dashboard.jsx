@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useLiveTelemetry } from "../lib/useLiveTelemetry";
 import { api } from "../lib/api";
 import LiveChart from "../components/LiveChart";
 import AlertFeed from "../components/AlertFeed";

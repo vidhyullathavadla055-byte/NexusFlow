@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import { api } from "../lib/api";
 import "./Dashboard.css";
 
@@ -10,6 +11,7 @@ const CHIPS = ["all", "critical", "warning", "resolved"];
 
 function Alerts() {
   const { token } = useAuth();
+  const toast = useToast();
   const [alerts, setAlerts] = useState([]);
   const [state, setState] = useState("loading"); // loading | ready | error
   const [filter, setFilter] = useState("all");
@@ -37,7 +39,7 @@ function Alerts() {
       const updated = await api.resolveAlert(id, token);
       setAlerts((prev) => prev.map((a) => (a._id === id ? updated : a)));
     } catch (err) {
-      alert(`Couldn't resolve alert: ${err.message}`);
+      toast.error(`Couldn't resolve alert: ${err.message}`);
     } finally {
       setResolvingId(null);
     }

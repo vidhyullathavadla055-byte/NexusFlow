@@ -1,0 +1,52 @@
+.ui-state {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 4px;
+  font-size: 13.5px;
+  color: var(--ink-500);
+}
+
+.ui-state--empty,
+.ui-state--error {
+  flex-direction: column;
+  text-align: center;
+  padding: 32px 16px;
+}
+
+.ui-state-spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  border-top-color: var(--amber-600);
+  animation: ui-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes ui-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ui-state-retry {
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink-700);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 6px 14px;
+  cursor: pointer;
+}
+
+.ui-state-retry:hover {
+  background: var(--paper);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-state-spinner {
+    animation: none;
+  }
+}

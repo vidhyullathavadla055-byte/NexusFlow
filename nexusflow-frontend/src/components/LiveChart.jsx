@@ -30,13 +30,13 @@ function LiveChart() {
   const latest = activeId ? latestByDevice[activeId] : null;
   const points = activeId ? history[activeId] || [] : [];
 
-  const { path, min, max } = useMemo(() => {
-    if (points.length < 2) return { path: "", min: 0, max: 1 };
+  const { path } = useMemo(() => {
+    if (points.length < 2) return { path: "" };
     const values = points.map((p) => p.value);
     const min = Math.min(...values);
     const max = Math.max(...values);
     const pad = (max - min) * 0.15 || 1;
-    return { path: buildPath(points, 100, 100, min - pad, max + pad), min, max };
+    return { path: buildPath(points, 100, 100, min - pad, max + pad) };
   }, [points]);
 
   return (
