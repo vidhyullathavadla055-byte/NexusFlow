@@ -1,76 +1,115 @@
- NexusFlow
+NexusFlow
 
- **Visual IoT Rule Builder & Real-Time Telemetry Processing Platform**
+Visual IoT Rule Builder & Real-Time Telemetry Processing Platform
 
-NexusFlow is a real-time IoT monitoring and rule-processing platform designed to process live turbine and sensor telemetry through configurable visual pipelines.
+NexusFlow is a real-time IoT monitoring and rule-processing platform for ingesting, storing, processing, and visualizing turbine and sensor telemetry through configurable visual pipelines.
 
-The platform combines a **React Flow-based visual rule builder**, **Node.js/Express backend**, **MongoDB Time-Series storage**, **RxJS stream processing**, and **WebSocket-based real-time communication**.
+The platform combines a React + Vite frontend, React Flow visual rule builder, Node.js + Express backend, MongoDB Time-Series storage, RxJS stream processing, and WebSocket-based real-time communication.
 
-Users can define telemetry-processing pipelines such as:
+A typical NexusFlow pipeline can be represented as:
 
-**Data Source → Moving Average → Threshold → Action**
+Data Source → Moving Average → Threshold → Action
 
-The backend processes incoming telemetry in real time, applies configured rules, and triggers actions when defined conditions are satisfied.
+Telemetry is ingested by the backend, persisted as time-series data, published to the reactive processing layer, evaluated against configured pipeline rules, and exposed to connected clients through WebSocket communication.
 
----
+📌 Project Overview
 
-## 🚀 Project Status
+NexusFlow is designed around two complementary capabilities:
 
-**Current Milestone: Week 2 — Mid-Project Review Completed**
+Real-time telemetry management
 
-| Area                          | Status                    |
-| ----------------------------- | ------------------------- |
-| Backend API                   | ✅ Completed               |
-| Authentication                | ✅ Completed               |
-| Telemetry Ingestion           | ✅ Completed               |
-| MongoDB Time-Series Storage   | ✅ Completed               |
-| Telemetry Query APIs          | ✅ Completed               |
-| WebSocket Telemetry Broadcast | ✅ Completed               |
-| RxJS Stream Compiler          | ✅ Completed               |
-| Custom Stream Operators       | ✅ Completed               |
-| Pipeline Graph API            | ✅ Completed               |
-| JWT Protected Graph APIs      | ✅ Completed               |
-| Per-Device Stream Isolation   | ✅ Verified                |
-| Load Testing                  | ✅ ~5,000 writes/sec       |
-| Frontend Builder              | 🔄 Week 1–2 planned scope |
-| Live Rule Runner              | ⏳ Week 3                  |
-| Activity & Alerts             | ⏳ Week 3                  |
-| Webhook/SMS Actions           | ⏳ Week 3–4                |
-| Settings                      | ⏳ Week 4                  |
+Receive single or bulk sensor readings.
 
-> **Verification:** Backend functionality listed as completed has been run and tested, including server startup, API routes, RxJS pipeline execution, WebSocket broadcasting, and ingestion load testing. Frontend functionality is documented according to the Week 1–2 project scope and should not be considered independently verified from this backend snapshot.
+Store telemetry in MongoDB Time-Series collections.
 
----
+Query device history, statistics, and rollups.
 
-# ✨ Key Features
+Broadcast live telemetry through WebSockets.
 
-### 🔐 Authentication & Authorization
+Visual rule and stream processing
 
-* User signup and login
-* Password hashing using `bcryptjs`
-* JWT-based authentication
-* Protected backend APIs
-* Current-user authentication endpoint
-* Role information stored with user accounts
+Represent automation logic as node-and-edge graphs.
 
-### 📡 Real-Time Telemetry
+Validate pipeline structure before execution.
 
-* Single telemetry ingestion
-* Bulk telemetry ingestion
-* MongoDB Time-Series collection
-* Device-based telemetry history
-* Telemetry statistics
-* Time-based telemetry rollups
-* Mock turbine/device registry
-* Real-time WebSocket broadcasting
+Compile graph definitions into RxJS Observable pipelines.
 
-### ⚙️ Visual Rule Processing
+Apply custom stream operators such as rolling averages, thresholds, and derivatives.
 
-NexusFlow represents rule pipelines as graph structures similar to React Flow.
+Trigger configured actions when rule conditions are satisfied.
+
+NexusFlow provides an end-to-end foundation for real-time IoT telemetry management, visual rule pipelines, reactive stream processing, and real-time communication. The platform is structured to support further production hardening and integrations.
+
+📊 Project Status
+
+NexusFlow currently provides:
+
+✅ Authentication and JWT authorization
+
+✅ Telemetry ingestion and bulk ingestion
+
+✅ MongoDB Time-Series telemetry storage
+
+✅ Telemetry history, statistics, and rollups
+
+✅ Device registry
+
+✅ WebSocket real-time telemetry broadcasting
+
+✅ Pipeline graph CRUD and deployment controls
+
+✅ RxJS stream compilation
+
+✅ Custom stream operators
+
+✅ Graph validation
+
+✅ Per-device stream isolation
+
+✅ Telemetry simulation and performance reporting
+
+🔄 Additional production integrations and hardening can be added as the platform evolves
+
+✨ Key Features
+
+🔐 Authentication & Authorization
+
+User signup and login
+
+Password hashing with bcryptjs
+
+JWT-based authentication
+
+Protected graph APIs
+
+Current-user authentication endpoint
+
+User role information stored with accounts
+
+📡 Real-Time Telemetry
+
+Single telemetry ingestion
+
+Bulk telemetry ingestion
+
+MongoDB Time-Series storage
+
+Device-based telemetry history
+
+Telemetry statistics
+
+Time-based telemetry rollups
+
+Mock turbine/device registry
+
+WebSocket-based live telemetry broadcasting
+
+🧩 Visual Rule Pipelines
+
+NexusFlow represents processing rules as graph structures compatible with a visual node-based builder.
 
 Example:
 
-```text
 ┌─────────────┐
 │ Data Source │
 └──────┬──────┘
@@ -87,83 +126,94 @@ Example:
        │
        ▼
 ┌─────────────┐
-│   Action    │
+│    Action   │
 └─────────────┘
-```
 
-The backend compiler converts the graph definition into an RxJS `Observable` pipeline.
+The backend stream compiler validates the graph and converts it into an executable RxJS pipeline.
 
-### 📊 Stream Operators
+⚙️ Stream Operators
 
 Implemented custom operators include:
 
-* `rollingAverage(windowSize)`
-* `threshold(operation, value)`
-* `derivative()`
+rollingAverage(windowSize)
 
-### 🔄 Pipeline Validation
+threshold(operation, value)
 
-The stream compiler validates:
+derivative()
 
-* Invalid node references
-* Missing nodes
-* Missing node configuration
-* Orphaned inputs
-* Cyclic graphs
-* Unconfigured Data Source nodes
-* Missing Action Trigger nodes
+✅ Pipeline Validation
 
-### 🚀 Performance Testing
+The compiler validates common graph and configuration problems, including:
+
+Invalid node references
+
+Missing nodes
+
+Missing node configuration
+
+Orphaned inputs
+
+Cyclic graphs
+
+Unconfigured Data Source nodes
+
+Missing Action Trigger nodes
+
+🚀 Performance Testing
 
 The telemetry simulator supports:
 
-* Configurable ingestion rate
-* Test duration
-* HTTP keep-alive
-* Backpressure detection
-* Latency measurement
-* Min latency
-* Average latency
-* P95 latency
-* Maximum latency
-* JSON load-test reports
+Configurable ingestion rate
 
-Week 2 testing achieved approximately:
+Configurable test duration
 
-**4,950–5,000 telemetry writes/sec with 0 reported errors**
+HTTP keep-alive
 
----
+Backpressure detection
 
-# 🏗️ System Architecture
+Latency measurement
 
-```text
+Minimum latency
+
+Average latency
+
+P95 latency
+
+Maximum latency
+
+JSON load-test reports
+
+The telemetry simulator supports high-throughput ingestion testing with configurable rates, duration, latency measurements, and JSON performance reporting.
+
+🏗️ System Architecture
+
                     ┌──────────────────────┐
                     │   IoT Devices /      │
-                    │ Turbine Sensors      │
+                    │   Turbine Sensors    │
                     └──────────┬───────────┘
                                │
                                ▼
                     ┌──────────────────────┐
-                    │   Ingestion API      │
-                    │ POST /api/ingest      │
+                    │    Ingestion API     │
+                    │    POST /api/ingest  │
                     └──────────┬───────────┘
                                │
-                 ┌─────────────┴─────────────┐
-                 ▼                           ▼
-        ┌─────────────────┐        ┌─────────────────┐
-        │ MongoDB         │        │ Telemetry Bus   │
-        │ Time-Series DB  │        │     RxJS        │
-        └────────┬────────┘        └────────┬────────┘
-                 │                          │
-                 ▼                          ▼
-        ┌─────────────────┐        ┌─────────────────┐
-        │ Telemetry APIs  │        │ Stream Compiler │
-        │ Stats/History   │        │ Rule Pipeline   │
-        │ Rollup          │        └────────┬────────┘
-        └─────────────────┘                 │
-                                            ▼
+                    ┌──────────┴───────────┐
+                    ▼                      ▼
+           ┌─────────────────┐    ┌─────────────────┐
+           │     MongoDB     │    │  Telemetry Bus  │
+           │  Time-Series DB │    │      RxJS       │
+           └────────┬────────┘    └────────┬────────┘
+                    │                      │
+                    ▼                      ▼
+           ┌─────────────────┐    ┌─────────────────┐
+           │ Telemetry APIs  │    │ Stream Compiler │
+           │ Stats / History  │    │  Rule Pipeline  │
+           │ / Rollup         │    └────────┬────────┘
+           └─────────────────┘             │
+                                           ▼
                                    ┌─────────────────┐
-                                   │ Action Trigger  │
+                                   │  Action Trigger │
                                    └────────┬────────┘
                                             │
                                             ▼
@@ -171,31 +221,79 @@ Week 2 testing achieved approximately:
                                    │ WebSocket Layer │
                                    │ Live Broadcast  │
                                    └─────────────────┘
-```
 
----
+Data Processing Flow
 
-# 🛠️ Technology Stack
+Telemetry Source
+      ↓
+Ingestion API
+      ↓
+MongoDB Time-Series Storage
+      ↓
+Telemetry Bus
+      ↓
+RxJS Stream Compiler
+      ↓
+Pipeline Operators
+      ↓
+Condition Evaluation
+      ↓
+Action Trigger
+      ↓
+WebSocket / Client Layer
 
-| Layer                  | Technology                            |
-| ---------------------- | ------------------------------------- |
-| Frontend               | React, Vite, React Flow, Tailwind CSS |
-| Backend                | Node.js, Express.js                   |
-| Language               | JavaScript / ESM                      |
-| Reactive Processing    | RxJS 7                                |
-| Realtime Communication | WebSocket (`ws`)                      |
-| Database               | MongoDB 5.0+                          |
-| Database Type          | MongoDB Time-Series                   |
-| Authentication         | JWT                                   |
-| Password Security      | bcryptjs                              |
-| API Style              | REST                                  |
-| Testing / Simulation   | Custom Telemetry Simulator            |
+🛠️ Technology Stack
 
----
+Layer
 
-# 📁 Project Structure
+Technology
 
-```text
+Frontend
+
+React, Vite, React Flow, Tailwind CSS
+
+Backend
+
+Node.js, Express.js
+
+Language
+
+JavaScript / ESM
+
+Reactive Processing
+
+RxJS 7
+
+Realtime Communication
+
+WebSocket (ws)
+
+Database
+
+MongoDB 5.0+
+
+Database Model
+
+MongoDB Time-Series
+
+Authentication
+
+JWT
+
+Password Security
+
+bcryptjs
+
+API Style
+
+REST
+
+Testing / Simulation
+
+Custom Telemetry Simulator
+
+📁 Project Structure
+
 NexusFlow/
 │
 ├── nexusflow-backend/
@@ -256,463 +354,642 @@ NexusFlow/
         ├── components/
         ├── data/
         └── pages/
-```
 
----
+🔐 Authentication
 
-# 🔐 Authentication
+NexusFlow uses JWT-based authentication to protect user-specific pipeline graph operations.
 
-NexusFlow uses JWT-based authentication.
+Authentication Endpoints
 
-### Available Authentication APIs
+Method
 
-```text
-POST /api/auth/signup
-POST /api/auth/login
-GET  /api/auth/me
-```
+Endpoint
 
-Authentication flow:
+Access
 
-```text
+POST
+
+/api/auth/signup
+
+Public
+
+POST
+
+/api/auth/login
+
+Public
+
+GET
+
+/api/auth/me
+
+JWT Protected
+
+Authentication Flow
+
 User
- │
- ▼
+  ↓
 Signup / Login
- │
- ▼
+  ↓
 Password Verification
- │
- ▼
+  ↓
 JWT Token
- │
- ▼
-Protected API Requests
-```
+  ↓
+Protected API Request
+  ↓
+Backend Authorization
 
-Passwords are securely hashed before being stored.
+Passwords are hashed before storage, and protected endpoints require a valid JWT.
 
----
+📡 Telemetry Ingestion
 
-# 📡 Telemetry Ingestion
+The backend provides APIs for individual and bulk telemetry ingestion.
 
-The backend provides APIs for both individual and bulk telemetry ingestion.
+Single Reading
 
-### Single Reading
-
-```http
 POST /api/ingest
-```
 
-### Bulk Readings
+Bulk Readings
 
-```http
 POST /api/ingest/bulk
-```
 
-Incoming telemetry is stored in MongoDB's Time-Series collection and simultaneously published through the telemetry processing layer.
+Incoming telemetry is stored in the MongoDB Time-Series collection and published through the telemetry processing layer.
 
----
+Telemetry Processing Concept
 
-# 📈 Telemetry APIs
+Incoming Reading
+      ↓
+Validation / Ingestion
+      ↓
+MongoDB Time-Series Storage
+      ↓
+Telemetry Bus
+      ↓
+Reactive Processing
+      ↓
+WebSocket Broadcast
 
-| Method | Endpoint                           | Purpose                  |
-| ------ | ---------------------------------- | ------------------------ |
-| GET    | `/api/telemetry/stats`             | Telemetry statistics     |
-| GET    | `/api/telemetry/:deviceId/history` | Device telemetry history |
-| GET    | `/api/telemetry/:deviceId/rollup`  | Aggregated telemetry     |
-| GET    | `/api/devices`                     | Available devices        |
+📈 Telemetry APIs
 
----
+Method
 
-# 🔌 WebSocket Communication
+Endpoint
 
-NexusFlow exposes a WebSocket endpoint:
+Purpose
 
-```text
+GET
+
+/api/telemetry/stats
+
+Telemetry statistics
+
+GET
+
+/api/telemetry/:deviceId/history
+
+Device telemetry history
+
+GET
+
+/api/telemetry/:deviceId/rollup
+
+Aggregated telemetry
+
+GET
+
+/api/devices
+
+Available devices
+
+These APIs provide the foundation for telemetry dashboards, historical analysis, and device-level monitoring.
+
+🔌 WebSocket Communication
+
+NexusFlow exposes a WebSocket endpoint for real-time telemetry communication.
+
 ws://<host>:<port>/ws
-```
 
 When telemetry is ingested, the backend broadcasts the live reading to connected WebSocket clients.
 
-This provides the foundation for real-time dashboard updates and future live rule execution.
+This enables real-time dashboard updates and provides the communication layer required for future live rule execution.
 
----
+🧩 Pipeline Graph API
 
-# 🧩 Pipeline Graph API
+Pipeline definitions are represented as graph structures containing nodes and edges.
 
-Pipeline graphs are represented using nodes and edges.
+A graph can contain:
 
-Each graph can contain:
+Nodes
 
-* Nodes
-* Edges
-* Owner
-* Name
-* Status
+Edges
 
-### Graph Endpoints
+Owner
 
-| Method | Endpoint                 | Auth |
-| ------ | ------------------------ | ---- |
-| GET    | `/api/graphs`            | 🔒   |
-| POST   | `/api/graphs`            | 🔒   |
-| GET    | `/api/graphs/:id`        | 🔒   |
-| PUT    | `/api/graphs/:id`        | 🔒   |
-| DELETE | `/api/graphs/:id`        | 🔒   |
-| POST   | `/api/graphs/:id/deploy` | 🔒   |
-| POST   | `/api/graphs/:id/stop`   | 🔒   |
+Name
 
-All graph APIs are protected using JWT authentication.
+Status
 
----
+Graph Endpoints
 
-# ⚙️ RxJS Stream Compiler
+Method
 
-The `streamCompiler.js` module converts a graph definition into an executable RxJS stream.
+Endpoint
 
-Example pipeline:
+Authentication
 
-```text
+GET
+
+/api/graphs
+
+🔒 JWT
+
+POST
+
+/api/graphs
+
+🔒 JWT
+
+GET
+
+/api/graphs/:id
+
+🔒 JWT
+
+PUT
+
+/api/graphs/:id
+
+🔒 JWT
+
+DELETE
+
+/api/graphs/:id
+
+🔒 JWT
+
+POST
+
+/api/graphs/:id/deploy
+
+🔒 JWT
+
+POST
+
+/api/graphs/:id/stop
+
+🔒 JWT
+
+All graph management APIs are protected using JWT authentication.
+
+⚙️ RxJS Stream Compiler
+
+The streamCompiler.js module converts a graph definition into an executable RxJS Observable pipeline.
+
+Example
+
 Telemetry
-    ↓
+   ↓
 Data Source
-    ↓
+   ↓
 Rolling Average
-    ↓
+   ↓
 Threshold
-    ↓
+   ↓
 Action Trigger
-```
 
-The compiler performs graph validation before creating the stream.
+Before creating the stream, the compiler validates the graph structure and node configuration.
 
-### Week 2 Validation
+Supported Validation Scenarios
 
-The following scenarios were tested:
+Valid pipeline compilation
 
-* Valid pipeline compilation
-* Rising telemetry sequence
-* Threshold condition
-* Multiple action triggers
-* Per-device isolation
-* Invalid graph references
-* Missing configuration
-* Pipeline structure validation
+Invalid graph references
 
-A synthetic rising-value telemetry sequence successfully triggered the configured action **3 times**, while remaining below-threshold readings were correctly ignored.
+Missing configuration
 
----
+Pipeline structure validation
 
-# 🧪 Load Testing
+Cyclic graph detection
 
-NexusFlow includes a telemetry simulation script for backend performance testing.
+Missing required nodes
 
-### Example
+Per-device stream isolation
 
-```bash
+Rule Execution
+
+A synthetic rising-value telemetry sequence successfully triggered the configured action 3 times, while below-threshold readings were ignored.
+
+🧮 Custom Stream Operators
+
+rollingAverage(windowSize)
+
+Calculates a rolling average over the configured window of telemetry values.
+
+Telemetry Values
+      ↓
+Sliding Window
+      ↓
+Average
+      ↓
+Next Operator
+
+threshold(operation, value)
+
+Evaluates telemetry against a configured threshold condition.
+
+Conceptually:
+
+value > threshold
+value < threshold
+value >= threshold
+value <= threshold
+value === threshold
+
+The exact supported operations are determined by the backend implementation.
+
+derivative()
+
+Calculates the change between telemetry values over time and can be used to identify increasing or decreasing trends.
+
+🚀 Performance & Load Testing
+
+NexusFlow includes a telemetry simulation script for testing ingestion performance.
+
+Example
+
 npm run simulate -- --rate=5000 --duration=30 --report=./load-report.json
-```
 
-The simulator supports:
+Test Flow
 
-```text
 Telemetry Generation
-        ↓
+       ↓
 HTTP Keep-Alive
-        ↓
+       ↓
 Backend Ingestion
-        ↓
+       ↓
 Latency Measurement
-        ↓
+       ↓
 Performance Report
-```
 
-### Week 2 Result
+Supported Metrics
 
-```text
-Target Rate       : 5,000 writes/sec
-Observed Rate     : ~4,950–5,000 writes/sec
-Errors            : 0 reported
-Duration          : Configurable
-Latency           : Min / Avg / P95 / Max
-Report            : JSON supported
-```
+Target ingestion rate
 
----
+Observed ingestion rate
 
-# 🌐 API Reference
+Error count
 
-| Method | Route                              | Authentication |
-| ------ | ---------------------------------- | -------------- |
-| POST   | `/api/auth/signup`                 | Public         |
-| POST   | `/api/auth/login`                  | Public         |
-| GET    | `/api/auth/me`                     | 🔒 JWT         |
-| POST   | `/api/ingest`                      | Public         |
-| POST   | `/api/ingest/bulk`                 | Public         |
-| GET    | `/api/telemetry/stats`             | Public         |
-| GET    | `/api/telemetry/:deviceId/history` | Public         |
-| GET    | `/api/telemetry/:deviceId/rollup`  | Public         |
-| GET    | `/api/devices`                     | Public         |
-| GET    | `/api/graphs`                      | 🔒 JWT         |
-| POST   | `/api/graphs`                      | 🔒 JWT         |
-| GET    | `/api/graphs/:id`                  | 🔒 JWT         |
-| PUT    | `/api/graphs/:id`                  | 🔒 JWT         |
-| DELETE | `/api/graphs/:id`                  | 🔒 JWT         |
-| POST   | `/api/graphs/:id/deploy`           | 🔒 JWT         |
-| POST   | `/api/graphs/:id/stop`             | 🔒 JWT         |
-| WS     | `/ws`                              | Public         |
+Minimum latency
 
----
+Average latency
 
-# 🚀 Local Development
+P95 latency
 
-## Prerequisites
+Maximum latency
 
-Make sure the following are installed:
+Configurable test duration
 
-* Node.js
-* npm
-* MongoDB 5.0+ or MongoDB Atlas
-* Git
+JSON performance report
 
----
+🌐 Complete API Reference
 
-## Backend Setup
+Method
 
-```bash
+Route
+
+Authentication
+
+POST
+
+/api/auth/signup
+
+Public
+
+POST
+
+/api/auth/login
+
+Public
+
+GET
+
+/api/auth/me
+
+🔒 JWT
+
+POST
+
+/api/ingest
+
+Public
+
+POST
+
+/api/ingest/bulk
+
+Public
+
+GET
+
+/api/telemetry/stats
+
+Public
+
+GET
+
+/api/telemetry/:deviceId/history
+
+Public
+
+GET
+
+/api/telemetry/:deviceId/rollup
+
+Public
+
+GET
+
+/api/devices
+
+Public
+
+GET
+
+/api/graphs
+
+🔒 JWT
+
+POST
+
+/api/graphs
+
+🔒 JWT
+
+GET
+
+/api/graphs/:id
+
+🔒 JWT
+
+PUT
+
+/api/graphs/:id
+
+🔒 JWT
+
+DELETE
+
+/api/graphs/:id
+
+🔒 JWT
+
+POST
+
+/api/graphs/:id/deploy
+
+🔒 JWT
+
+POST
+
+/api/graphs/:id/stop
+
+🔒 JWT
+
+WS
+
+/ws
+
+Public
+
+🚀 Local Development
+
+Prerequisites
+
+Install the following before starting the project:
+
+Node.js
+
+npm
+
+MongoDB 5.0+ or MongoDB Atlas
+
+Git
+
+1. Clone the Repository
+
+git clone <repository-url>
+cd NexusFlow
+
+Replace <repository-url> with the repository URL used by your team.
+
+2. Backend Setup
+
 cd nexusflow-backend
-
 npm install
 
+Create the environment file:
+
 cp .env.example .env
-```
 
-Configure:
+Configure the required environment variables:
 
-```env
 MONGO_URI=
 MONGO_DB_NAME=
 PORT=4000
 CORS_ORIGIN=
 JWT_SECRET=
 JWT_EXPIRES_IN=
-```
 
-Start the development server:
+Environment Variables
 
-```bash
+Variable
+
+Purpose
+
+MONGO_URI
+
+MongoDB connection string
+
+MONGO_DB_NAME
+
+Database name
+
+PORT
+
+Backend server port
+
+CORS_ORIGIN
+
+Allowed frontend origin
+
+JWT_SECRET
+
+Secret used for JWT signing
+
+JWT_EXPIRES_IN
+
+JWT expiration configuration
+
+Never commit real secrets or production credentials to the repository.
+
+3. Start the Backend
+
 npm run dev
-```
 
-Backend:
+Default backend address:
 
-```text
 http://localhost:4000
-```
 
-WebSocket:
+WebSocket endpoint:
 
-```text
 ws://localhost:4000/ws
-```
 
----
+4. Frontend Setup
 
-## Frontend Setup
+Open a second terminal:
 
-```bash
 cd nexusflow-frontend
-
 npm install
-
 npm run dev
-```
 
-Frontend:
+The frontend is available at:
 
-```text
 http://localhost:5173
-```
 
 The frontend API client should point to the running backend instance.
 
----
+🧪 Telemetry Simulation
 
-# 📋 Week 1 — Foundation Milestone
+The backend includes a simulator for generating telemetry traffic.
 
-### Completed
+Example:
 
-* [x] Node.js + Express backend setup
-* [x] MongoDB connection
-* [x] MongoDB Time-Series telemetry collection
-* [x] User authentication
-* [x] JWT authentication
-* [x] Password hashing
-* [x] Telemetry ingestion API
-* [x] Bulk telemetry ingestion
-* [x] Telemetry statistics API
-* [x] Device history API
-* [x] Telemetry rollup API
-* [x] Device registry
-* [x] WebSocket telemetry broadcast
-* [x] Telemetry simulation
+npm run simulate -- --rate=5000 --duration=30 --report=./load-report.json
 
-### Frontend Scope
+This is useful for:
 
-* [ ] React/Vite application
-* [ ] React Flow canvas
-* [ ] Pan/zoom
-* [ ] Protected routing
-* [ ] Authentication UI
+Development
 
----
+Backend testing
 
-# 📋 Week 2 — Stream Engine & Pipeline Management
+WebSocket testing
 
-### Completed
+Stream-processing validation
 
-* [x] Pipeline graph data model
-* [x] Graph CRUD APIs
-* [x] JWT-protected graph APIs
-* [x] Graph deploy/stop endpoints
-* [x] RxJS stream compiler
-* [x] Graph validation
-* [x] Rolling average operator
-* [x] Threshold operator
-* [x] Derivative operator
-* [x] Per-device stream isolation
-* [x] Real telemetry stream processing
-* [x] Synthetic rule execution test
-* [x] Telemetry load testing
-* [x] ~5,000 writes/sec ingestion benchmark
-* [x] JSON performance report support
+Ingestion benchmarking
 
-### Remaining / Not Independently Verified
+Performance reporting
 
-* [ ] Frontend canvas persistence round-trip
-* [ ] Dashboard KPI implementation
-* [ ] Frontend automated verification
+⚠️ Known Limitations
 
----
+The current milestone intentionally does not represent the complete production rule-execution workflow.
 
-# 🗺️ Upcoming Development — Week 3 & Week 4
+At the current stage:
 
-The following features are intentionally outside the Week 2 milestone.
+Graph deploy/stop APIs are available.
 
-## Week 3 — Live Rule Execution
+The RxJS compiler can compile and execute validated pipelines.
 
-Planned:
+Telemetry can be streamed and broadcast through WebSocket.
 
-* Live deployed graph execution
-* Rule runner service
-* WebSocket → Rule Engine integration
-* Real-time pipeline status
-* Activity logging
-* Alerts page
-* Trigger history
-* Rule execution monitoring
+Full automatic connection between deployed graphs and the live telemetry stream is planned for future development.
 
-## Week 4 — Actions & Platform Settings
+Activity and alert persistence is planned for future development.
 
-Planned:
+SMS and webhook delivery are planned for future development–4.
 
-* Webhook actions
-* SMS notifications
-* Settings page
-* Notification configuration
-* User preferences
-* Production hardening
-* Final integration testing
+Frontend functionality should be verified separately when the frontend implementation is available.
 
----
+These limitations reflect the current milestone rather than missing architectural direction.
 
-# 🧪 Current Verification Summary
+🔒 Security Considerations
 
-| Test                      | Result                        |
-| ------------------------- | ----------------------------- |
-| Backend server startup    | ✅ Passed                      |
-| Authentication APIs       | ✅ Tested                      |
-| Telemetry ingestion       | ✅ Tested                      |
-| Bulk ingestion            | ✅ Tested                      |
-| Telemetry statistics      | ✅ Tested                      |
-| Device history            | ✅ Tested                      |
-| Telemetry rollup          | ✅ Tested                      |
-| WebSocket broadcast       | ✅ Tested                      |
-| Graph APIs                | ✅ Implemented                 |
-| RxJS pipeline compilation | ✅ Tested                      |
-| Threshold rule execution  | ✅ Tested                      |
-| Per-device isolation      | ✅ Verified                    |
-| Load test                 | ✅ ~5,000 writes/sec           |
-| Frontend UI               | ⚠️ Not independently verified |
-| Full live rule runner     | ⏳ Week 3                      |
-| Alerts / Activity         | ⏳ Week 3                      |
-| SMS / Webhooks            | ⏳ Week 3–4                    |
+NexusFlow currently includes:
 
----
+JWT-based authentication
 
-# 👥 Module Ownership
+Password hashing with bcryptjs
 
-| Module                        | Main Components                                        |
-| ----------------------------- | ------------------------------------------------------ |
-| **Authentication & Security** | Auth APIs, JWT middleware, User Model                  |
-| **Database**                  | MongoDB configuration, Time-Series telemetry model     |
-| **Telemetry Ingestion**       | Ingestion APIs, telemetry controllers, device registry |
-| **Realtime Processing**       | RxJS compiler, telemetry bus, custom operators         |
-| **WebSocket**                 | Live telemetry broadcasting                            |
-| **Pipeline Management**       | Graph model, graph controllers, graph routes           |
-| **Load Testing**              | Telemetry simulator, performance reporting             |
-| **Frontend Builder**          | React Flow canvas, nodes, palette, inspector           |
-| **Frontend Dashboard**        | KPI cards, graphs, application shell                   |
+Protected graph management APIs
 
----
+Environment-based configuration
 
-# 📌 Known Limitations
+Separation of credentials from source code through .env
 
-The Week 2 milestone intentionally does not include the complete production rule-execution workflow.
+For production deployment, additional hardening should be completed as part of the final milestone, including appropriate secret management, API security controls, validation, monitoring, and deployment configuration.
 
-Currently:
+🔄 End-to-End Platform Flow
 
-* Graph deploy/stop APIs are available.
-* The RxJS compiler can compile and execute a validated pipeline.
-* Telemetry can be streamed and broadcast through WebSocket.
-* Full automatic connection between a deployed graph and the live telemetry WebSocket stream is planned for Week 3.
-* Activity and alert persistence is planned for Week 3.
-* SMS and webhook delivery are planned for Week 3–4.
-* Frontend functionality should be verified separately when the frontend implementation is available.
+The platform supports the following end-to-end conceptual flow:
 
----
+┌───────────────────────┐
+│   IoT / Sensor Data   │
+└───────────┬───────────┘
+            │
+            ▼
+┌───────────────────────┐
+│    Ingestion API      │
+└───────────┬───────────┘
+            │
+       ┌────┴─────┐
+       ▼          ▼
+┌────────────┐  ┌───────────────┐
+│  MongoDB   │  │ Telemetry Bus │
+│ Time-Series│  │     RxJS      │
+└────────────┘  └───────┬───────┘
+                         │
+                         ▼
+                ┌─────────────────┐
+                │ Stream Compiler │
+                └────────┬────────┘
+                         │
+                         ▼
+                ┌─────────────────┐
+                │ Custom Operators│
+                │ Avg / Threshold │
+                │ / Derivative    │
+                └────────┬────────┘
+                         │
+                         ▼
+                ┌─────────────────┐
+                │ Action Trigger  │
+                └────────┬────────┘
+                         │
+                         ▼
+                ┌─────────────────┐
+                │ WebSocket Layer │
+                └─────────────────┘
 
-# 🎯 Week 2 Milestone Summary
+🎯 Project Summary
 
-NexusFlow has completed its **backend foundation and core stream-processing layer** through Week 2.
+NexusFlow is a full-stack IoT telemetry and visual rule-processing platform that brings together telemetry ingestion, time-series storage, reactive stream processing, pipeline management, and real-time communication.
 
-The system can currently:
+The platform is designed around the following workflow:
 
-```text
-Receive Telemetry
+IoT / Sensor Data
        ↓
-Store Time-Series Data
+Telemetry Ingestion
        ↓
-Publish Real-Time Events
+MongoDB Time-Series Storage
        ↓
-Compile Rule Graph
+Real-Time Telemetry Bus
        ↓
-Process Telemetry using RxJS
+Visual Rule Graph
        ↓
-Evaluate Conditions
+RxJS Stream Processing
        ↓
-Trigger Configured Actions
-```
+Conditions & Operators
+       ↓
+Action Trigger
+       ↓
+Real-Time Client Communication
 
-The next milestone is to connect the validated stream engine with **deployed visual pipelines**, followed by real-time **Activity, Alerts, Webhook/SMS actions, and Settings**.
+Its modular architecture separates authentication, telemetry management, pipeline management, stream processing, WebSocket communication, and frontend visualization, making the project suitable for development, evaluation, demonstration, and future production hardening.
 
----
-
-## 📄 License
+📄 License
 
 This project is currently developed as an internal project / learning and evaluation application.
 
----
+NexusFlow
 
-**NexusFlow — Building visual, real-time IoT automation pipelines.**
+Building visual, real-time IoT automation pipelines.
