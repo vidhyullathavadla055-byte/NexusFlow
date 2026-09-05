@@ -28,6 +28,14 @@ export async function listAlerts({ limit = 50, deviceId, status } = {}) {
 
 /** Marks an alert resolved. Returns the updated alert, or null if the id doesn't exist. */
 export async function resolveAlert(id) {
+  // NOTE: mongodb driver v6 defaults `includeResultMetadata` to false, so
+  // findOneAndUpdate already resolves to the document itself (or null) —
+  // it is NOT wrapped in { value: doc }. An earlier version of this code
+  // did `result?.value || result`, assuming the old wrapped shape as a
+  // fallback — but alert documents themselves have their own `value`
+  // field (the sensor reading that triggered the alert), so that
+  // fallback accidentally matched and returned just the raw reading
+  // instead of the resolved alert. Do not reintroduce that fallback.
   const result = await getDb()
     .collection(COLLECTION)
     .findOneAndUpdate(
@@ -35,5 +43,5 @@ export async function resolveAlert(id) {
       { $set: { status: "resolved", resolvedAt: new Date() } },
       { returnDocument: "after" }
     );
-  return result?.value || result || null;
+  return result ?? null;
 }

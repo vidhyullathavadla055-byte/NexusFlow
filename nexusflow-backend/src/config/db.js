@@ -57,6 +57,21 @@ async function ensureSupportingCollections() {
   await db.collection("graphs").createIndex({ owner: 1 }); // per-user graph scoping
   await db.collection("alerts").createIndex({ createdAt: -1 });
   await db.collection("alerts").createIndex({ deviceId: 1 });
+
+  // These two collections (activityLogModel.js / deliveryHistoryModel.js)
+  // were previously never provisioned here — they'd still auto-create on
+  // first insert, but with zero indexes, so every listActivity()/
+  // listDeliveries() query (which sorts by createdAt and often filters by
+  // type/graphId/channel/status) would do a full collection scan as data
+  // grows in the live database.
+  await db.collection("activityLog").createIndex({ createdAt: -1 });
+  await db.collection("activityLog").createIndex({ graphId: 1 });
+  await db.collection("activityLog").createIndex({ type: 1 });
+
+  await db.collection("deliveryHistory").createIndex({ createdAt: -1 });
+  await db.collection("deliveryHistory").createIndex({ channel: 1 });
+  await db.collection("deliveryHistory").createIndex({ status: 1 });
+
   await ensureUserIndexes(); // unique index on users.email
 }
 
